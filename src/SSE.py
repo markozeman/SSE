@@ -1,75 +1,94 @@
+import os
+
 from cryptography.fernet import Fernet
-
 from Crypto.Cipher import DES3, AES
-
 import pyDes
 
-
+from help_functions import *
 
 
 class SSE:
     def __init__(self):
-        self.key = self.generate_key_2()
+        # self.generate_and_save_keys()
+        # self.generate_and_save_IVs(True)
+        pass
 
+    def generate_and_save_keys(self):
+        self.index_key = get_random_bytes(32)
+        self.document_key = get_random_bytes(32)
 
-    def generate_key_2(self):
-        return Fernet(Fernet.generate_key())
+        keys = [self.index_key, self.document_key]
+        paths = ['../Private/keys/index_key', '../Private/keys/document_key']
+        write_keys_to_file(keys, paths, bin=True)
 
-    def encrypt_2(self, string):
-        return self.key.encrypt(string.encode('utf-8'))
+        keys = [bytes_2_string(self.index_key), bytes_2_string(self.document_key)]
+        paths = ['../Private/keys/index_key.txt', '../Private/keys/document_key.txt']
+        write_keys_to_file(keys, paths)
 
-    def decrypt_2(self, encrypted_bytes):
-        return self.key.decrypt(encrypted_bytes).decode()
+    def generate_and_save_IVs(self, save=False):
+        obj = files_in_dir('../Data', save=save)
 
+        iv_obj = {}
+        for key, value in obj.items():
+            iv = get_random_bytes(16)
+            iv_obj[value] = bytes_2_string(iv)
 
-def write_to_file(filepath, content):
-    f = open(filepath, 'w')
-    f.write(content)
-    f.close()
+        if (save):
+            write_obj_to_json_file(iv_obj, '../Private/IVs/ivs.json')
 
-def write_to_bin_file(filepath, content):
-    f = open(filepath, 'wb')
-    f.write(content)
-    f.close()
+    def encrypt(self, key, IV, message):
+        # key and IV are bytes, message is string
+        # returns bytes
+        padded_message_bytes = pad(string_2_bytes(message, 'utf-8'))
 
-def read_file(filepath):
-    with open(filepath) as f:
-        content = f.readlines()
-        return content
+        print('key', key, type(key), len(key))
+        print('IV', IV, type(IV), len(IV))
+        print('padded message', padded_message_bytes, type(padded_message_bytes), len(padded_message_bytes))
 
-def read_bin_file(filepath):
-    with open(filepath, "rb") as f:
-        Bytes = []
-        byte = f.read(1)
-        Bytes.append(byte)
-        while byte != b"":
-            byte = f.read(1)
-            Bytes.append(byte)
-        return b''.join(Bytes)
+        aes = AES.new(key, AES.MODE_CBC, IV)
+        ciphertext = aes.encrypt(padded_message_bytes)
+        return ciphertext
 
-
-def ByteToHex(byteStr):
-    """
-    Convert a byte string to it's hex string representation e.g. for output.
-    """
-    a = ''.join(["%02X " % ord(x) for x in byteStr]).strip()
-    print(a)
-
-    return [chr(int(num, 16)) for num in a.split(' ') if (num is not '78' and num is not '5C')]
-
-
-def pad(data):
-    length = 16 - (len(data) % 16)
-    data += bytes([length]) * length
-    return data
-
-
-def unpad(data):
-    return data[:-data[-1]]
+    def decrypt(self, key, IV, ciphertext):
+        # all 3 parameters are bytes
+        # returns string
+        aes = AES.new(key, AES.MODE_CBC, IV)
+        plaintext = unpad(aes.decrypt(ciphertext))
+        return plaintext.decode()
 
 
 
 if __name__ == '__main__':
+    sse = SSE()
+
+    key = read_bin_file('../Private/keys/index_key')
+    # print(key)
+
+    res = read_json_file('../Private/IVs/ivs.json')
+    # print(res)
+    iv = string_2_bytes(res['0'], 'latin-1')
+    # print(iv, type(iv))
+
+    mess = 'Danes je še lepo, a čudno dežuje...'
+    # print(len(mess))
+
+    print('\n')
+    cipher = sse.encrypt(key, iv, mess)
+    print('\ncipher: ', cipher)
+
+    print('---------------------------------------------------------')
+    print('---------------------------------------------------------')
+
+    sse_222 = SSE()
+    plain = sse_222.decrypt(key, iv, cipher)
+    print('plain: ', plain)
+
+    # TODO
+    # try to encrypt and decrypt more messages with the same AES object instance
+
+
+    '''
+    print('---------------------------------------------------------')
     print('AES CBC')
 
     obj = AES.new(b'This is a key123This is a key123', AES.MODE_CBC, b'This is an IV456')
@@ -84,6 +103,12 @@ if __name__ == '__main__':
     ciphertext = obj_test.encrypt(message)
     print(ciphertext)
 
+    obj_test_2 = AES.new(b'This is a key123This is a key123', AES.MODE_CBC, b'This is an IV456')
+    message = "Anja je ".encode('utf-8')
+    message = pad(message)
+    ciphertext = obj_test_2.encrypt(message)
+    print(ciphertext)
+
     obj_test_3 = AES.new(b'This is a key123This is a key123', AES.MODE_CBC, b'This is an IV456')
     message = "lepa punca.".encode('utf-8')
     message = pad(message)
@@ -94,7 +119,7 @@ if __name__ == '__main__':
     dec = obj2.decrypt(ciphertext)
     dec = unpad(dec)
     print(dec.decode())
-
+    '''
 
 
     '''
@@ -147,14 +172,6 @@ if __name__ == '__main__':
     print('---------------------------------------------------------')
     print('---------------------------------------------------------')
     print('---------------------------------------------------------')
-    '''
-
-
-
-    '''
-    print('---------------------------------------------------------')
-    print('---------------------------------------------------------')
-    print('---------------------------------------------------------')
 
     data = "Please encrypt my data now now now  io".encode('utf-8')
 
@@ -181,7 +198,7 @@ if __name__ == '__main__':
 
     # a = bytes(bytearray.fromhex(d_22))
     # b = unhexlify(d_22)
-    # c = ByteToHex(str(d_22))
+    # c = byte_2_hex(str(d_22))
 
     print("Encrypted 2: %r" % d_22)
 
