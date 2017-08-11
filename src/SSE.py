@@ -10,7 +10,7 @@ from help_functions import *
 class SSE:
     def __init__(self):
         # self.generate_and_save_keys()
-        self.generate_and_save_IVs()
+        # self.generate_and_save_IVs()
         pass
 
     def generate_and_save_keys(self):
@@ -30,11 +30,7 @@ class SSE:
     def generate_and_save_IVs(self):
         obj, changed_ids = files_in_dir('../Data')
 
-        try:
-            curr_ivs = read_json_file('../Private/IVs/ivs.json')
-        except IOError:
-            print('Cannot open file at: ../Private/IVs/ivs.json')
-            return False
+        curr_ivs = read_json_file('../Private/IVs/ivs.json')
 
         # -1 because of 'current_value' key
         if (len(obj)-1 == len(curr_ivs)):
@@ -74,18 +70,47 @@ class SSE:
             plaintext.append(plain)
         return plaintext
 
+    def create_switched_document_index(self):
+        curr_json = read_json_file('../Private/document_index.json')
+        switched_json = {value: key for key, value in curr_json.items() if (key != 'current_value')}
+        write_obj_to_json_file(switched_json, '../Private/document_index_switched.json')
+
+    def create_inverted_keyword_index(self, files_destination):
+        # files_destination is a list of strings
+        index_json = read_json_file('../Private/document_index.json')
+
+        all_words = []
+        keyword_index = {}
+        files = os.listdir(files_destination)
+        for path in files:
+            content = read_file(files_destination + path)
+            # print(path, content)
+            keyword_index[index_json[path]] = content
+            all_words += content
+
+        all_words = list(set(all_words))  # make words list unique
+        # print(keyword_index)
+        # print(all_words)
+
+        inverted_index = {word: [txt for txt, words in keyword_index.items() if word in words] for word in all_words}
+        # print(inverted_index)
+
+        write_obj_to_json_file(inverted_index, '../Private/inverted_index.json')
+
+
 
 
 if __name__ == '__main__':
     sse = SSE()
 
-    '''
+    sse.create_inverted_keyword_index('../Data/')
+
     key = read_bin_file('../Private/keys/index_key')
     # print(key)
 
     res = read_json_file('../Private/IVs/ivs.json')
     # print(res)
-    iv = string_2_bytes(res['0'], 'latin-1')
+    iv = string_2_bytes(res['2'], 'latin-1')
     # print(iv, type(iv))
 
     mess = ['Danes je še lepo, a čudno dežuje...', '123lalala, čeno cieoje']
@@ -101,5 +126,4 @@ if __name__ == '__main__':
     plain = sse_222.decrypt(key, iv, cipher)
     print('plain: ', plain)
 
-    '''
 

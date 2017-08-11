@@ -16,7 +16,7 @@ def write_to_bin_file(filepath, content):
 
 def read_file(filepath):
     with open(filepath) as f:
-        content = f.readlines()
+        content = f.read().split()
         return content
 
 
@@ -79,19 +79,18 @@ def write_obj_to_json_file(obj, filepath):
 
 
 def read_json_file(filepath):
-    with open(filepath) as data_file:
-        return json.load(data_file)
-
+    try:
+        with open(filepath) as data_file:
+            return json.load(data_file)
+    except IOError:
+        print('Cannot open file at: ', filepath)
+        return False
 
 
 def files_in_dir(path):
     files = os.listdir(path)
 
-    try:
-        curr_json = read_json_file('../Private/document_index.json')
-    except IOError:
-        print('Cannot open file at: ../Private/document_index.json')
-        return False
+    curr_json = read_json_file('../Private/document_index.json')
 
     # -1 because of 'current_value' key
     if (len(files) == len(curr_json)-1):
