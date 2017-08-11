@@ -50,7 +50,7 @@ class SSE:
 
     def encrypt(self, key, IV, message):
         # key and IV are bytes, message is list of strings
-        # returns bytes
+        # returns list of bytes
         aes = AES.new(key, AES.MODE_CBC, IV)
 
         ciphertext = []
@@ -127,12 +127,30 @@ class SSE:
         print(curr_inverted_index)
         write_obj_to_json_file(curr_inverted_index, '../Private/inverted_index.json')
 
+    def encrypt_index(self):
+        inverted_index = read_json_file('../Private/inverted_index.json')
+        index_key = read_bin_file('../Private/keys/index_key')
+        ivs = read_json_file('../Private/IVs/ivs.json')
+
+        encrypted_index = {}
+        for word, document_ids in inverted_index.items():
+            for doc_id in document_ids:
+                iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
+                ciphertext = bytes_2_string(self.encrypt(index_key, iv, [word])[0])
+                encrypted_index[ciphertext] = doc_id
+        print(len(encrypted_index), encrypted_index)
+
+        write_obj_to_json_file(encrypted_index, '../Private/encrypted_index.json')
+
 
 
 if __name__ == '__main__':
     sse = SSE()
 
     # sse.create_inverted_keyword_index('../Data/')
+
+    sse.encrypt_index()
+
 
     # sse.update_inverted_keyword_index(['text_18.txt'])
 
