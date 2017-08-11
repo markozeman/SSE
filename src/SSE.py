@@ -10,7 +10,7 @@ from help_functions import *
 class SSE:
     def __init__(self):
         # self.generate_and_save_keys()
-        # self.generate_and_save_IVs()
+        # self.update_IVs_and_doc_index()
         pass
 
     def generate_and_save_keys(self):
@@ -27,8 +27,8 @@ class SSE:
         paths = ['../Private/keys/index_key.txt', '../Private/keys/document_key.txt']
         write_keys_to_file(keys, paths)
 
-    def generate_and_save_IVs(self):
-        obj, changed_ids = files_in_dir('../Data')
+    def update_IVs_and_doc_index(self):
+        obj, changed_ids = make_document_index('../Data')
 
         curr_ivs = read_json_file('../Private/IVs/ivs.json')
 
@@ -93,18 +93,51 @@ class SSE:
         # print(all_words)
 
         inverted_index = {word: [txt for txt, words in keyword_index.items() if word in words] for word in all_words}
-        # print(inverted_index)
+        print(inverted_index)
 
         write_obj_to_json_file(inverted_index, '../Private/inverted_index.json')
 
+    def update_inverted_keyword_index(self, changed_files):
+        # can apply to only new files
+        # changed_files is a list of strings
+        index_json = read_json_file('../Private/document_index.json')
+
+        all_words = []
+        new_keyword_index = {}
+        for path in changed_files:
+            content = read_file('../Data/' + path)
+            # print(path, content)
+            new_keyword_index[index_json[path]] = content
+            all_words += content
+
+        all_words = list(set(all_words))  # make words list unique
+
+        curr_inverted_index = read_json_file('../Private/inverted_index.json')
+        new_inverted_index = {word: [txt for txt, words in new_keyword_index.items() if word in words] for word in all_words}
+        print(curr_inverted_index)
+        print(new_inverted_index)
+
+        for key, value in new_inverted_index.items():
+            if (key in curr_inverted_index):
+                curr_inverted_index[key] += value
+                curr_inverted_index[key] = list(set(curr_inverted_index[key]))
+            else:
+                curr_inverted_index[key] = value
+
+        print(curr_inverted_index)
+        write_obj_to_json_file(curr_inverted_index, '../Private/inverted_index.json')
 
 
 
 if __name__ == '__main__':
     sse = SSE()
 
-    sse.create_inverted_keyword_index('../Data/')
+    # sse.create_inverted_keyword_index('../Data/')
 
+    # sse.update_inverted_keyword_index(['text_18.txt'])
+
+
+    '''
     key = read_bin_file('../Private/keys/index_key')
     # print(key)
 
@@ -126,4 +159,4 @@ if __name__ == '__main__':
     plain = sse_222.decrypt(key, iv, cipher)
     print('plain: ', plain)
 
-
+    '''

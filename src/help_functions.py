@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 
 def write_to_file(filepath, content):
@@ -15,6 +16,8 @@ def write_to_bin_file(filepath, content):
 
 
 def read_file(filepath):
+    # regex_remove = re.compile('[,\.!?]')
+    # regex_remove.sub('', 'ab3d*E')
     with open(filepath) as f:
         content = f.read().split()
         return content
@@ -87,7 +90,7 @@ def read_json_file(filepath):
         return False
 
 
-def files_in_dir(path):
+def make_document_index(path):
     files = os.listdir(path)
 
     curr_json = read_json_file('../Private/document_index.json')
