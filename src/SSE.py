@@ -37,24 +37,26 @@ class SSE:
             write_obj_to_json_file(iv_obj, '../Private/IVs/ivs.json')
 
     def encrypt(self, key, IV, message):
-        # key and IV are bytes, message is string
+        # key and IV are bytes, message is list of strings
         # returns bytes
-        padded_message_bytes = pad(string_2_bytes(message, 'utf-8'))
-
-        print('key', key, type(key), len(key))
-        print('IV', IV, type(IV), len(IV))
-        print('padded message', padded_message_bytes, type(padded_message_bytes), len(padded_message_bytes))
-
         aes = AES.new(key, AES.MODE_CBC, IV)
-        ciphertext = aes.encrypt(padded_message_bytes)
+
+        ciphertext = []
+        for m in message:
+            cipher = aes.encrypt(pad(string_2_bytes(m, 'utf-8')))
+            ciphertext.append(cipher)
         return ciphertext
 
     def decrypt(self, key, IV, ciphertext):
-        # all 3 parameters are bytes
+        # key and IV are bytes, ciphertext is list of bytes
         # returns string
         aes = AES.new(key, AES.MODE_CBC, IV)
-        plaintext = unpad(aes.decrypt(ciphertext))
-        return plaintext.decode()
+
+        plaintext = []
+        for cipher in ciphertext:
+            plain = unpad(aes.decrypt(cipher)).decode()
+            plaintext.append(plain)
+        return plaintext
 
 
 
@@ -69,8 +71,7 @@ if __name__ == '__main__':
     iv = string_2_bytes(res['0'], 'latin-1')
     # print(iv, type(iv))
 
-    mess = 'Danes je še lepo, a čudno dežuje...'
-    # print(len(mess))
+    mess = ['Danes je še lepo, a čudno dežuje...', '123lalala, čeno cieoje']
 
     print('\n')
     cipher = sse.encrypt(key, iv, mess)
@@ -83,8 +84,6 @@ if __name__ == '__main__':
     plain = sse_222.decrypt(key, iv, cipher)
     print('plain: ', plain)
 
-    # TODO
-    # try to encrypt and decrypt more messages with the same AES object instance
 
 
     '''
