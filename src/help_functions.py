@@ -80,17 +80,48 @@ def write_obj_to_json_file(obj, filepath):
 
 def read_json_file(filepath):
     with open(filepath) as data_file:
-        data = json.load(data_file)
-        return data
+        return json.load(data_file)
 
 
-def files_in_dir(path, save=False):
+
+def files_in_dir(path):
     files = os.listdir(path)
-    obj = {}
-    for i in range(len(files)):
-        obj[files[i]] = i
 
-    if (save):
-        write_obj_to_json_file(obj, '../Private/document_index.json')
+    try:
+        curr_json = read_json_file('../Private/document_index.json')
+    except IOError:
+        print('Cannot open file at: ../Private/document_index.json')
+        return False
 
-    return obj
+    # -1 because of 'current_value' key
+    if (len(files) == len(curr_json)-1):
+        print('Document index is already up to date.')
+        return [curr_json, []]
+
+    # update json file
+    changed_ids = []
+    current_value = curr_json['current_value'] if 'current_value' in curr_json else 0
+    if (len(files) > len(curr_json)-1):
+        for i in range(len(files)):
+            if (files[i] not in curr_json):
+                curr_json[files[i]] = current_value
+                changed_ids.append(current_value)
+                current_value += 1
+        curr_json['current_value'] = current_value
+    else:
+        delete_keys = []
+        for key, value in curr_json.items():
+            if (key not in files and key != 'current_value'):
+                delete_keys.append(key)
+                changed_ids.append(value)
+
+        for del_key in delete_keys:
+            curr_json.pop(del_key, None)
+
+    # save updated version
+    write_obj_to_json_file(curr_json, '../Private/document_index.json')
+
+    return [curr_json, changed_ids]
+
+
+
