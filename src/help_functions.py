@@ -34,16 +34,6 @@ def read_bin_file(filepath):
         return b''.join(B)
 
 
-def byte_2_hex(byteStr):
-    """
-    Convert a byte string to it's hex string representation e.g. for output.
-    """
-    a = ''.join(["%02X " % ord(x) for x in byteStr]).strip()
-    print(a)
-
-    return [chr(int(num, 16)) for num in a.split(' ') if (num is not '78' and num is not '5C')]
-
-
 def pad(data):
     length = 16 - (len(data) % 16)
     data += bytes([length]) * length
@@ -93,7 +83,7 @@ def read_json_file(filepath):
 def make_document_index(path):
     files = os.listdir(path)
 
-    curr_json = read_json_file('../Private/document_index.json')
+    curr_json = read_json_file(get_path('doc_index'))
 
     # -1 because of 'current_value' key
     if (len(files) == len(curr_json)-1):
@@ -121,9 +111,28 @@ def make_document_index(path):
             curr_json.pop(del_key, None)
 
     # save updated version
-    write_obj_to_json_file(curr_json, '../Private/document_index.json')
+    write_obj_to_json_file(curr_json, get_path('doc_index'))
 
     return [curr_json, changed_ids]
 
 
+def get_path(short_path):
+    paths = {
+        'doc_index': '../Private/document_index.json',
+        'doc_index_switched': '../Private/document_index_switched.json',
 
+        'inverted_index': '../Private/inverted_index.json',
+
+        'index_key': '../Private/keys/index_key',
+        'index_key_txt': '../Private/keys/index_key.txt',
+        'document_key': '../Private/keys/document_key',
+        'document_key_txt': '../Private/keys/document_key.txt',
+
+        'ivs': '../Private/IVs/ivs.json',
+
+        'encrypted_index': '../Private/encrypted_index.json',
+
+        'data': '../Data/',
+        'server': '../Server/'
+    }
+    return paths[short_path]
