@@ -18,8 +18,14 @@ def write_to_bin_file(filepath, content):
 def read_file(filepath):
     # regex_remove = re.compile('[,\.!?]')
     # regex_remove.sub('', 'ab3d*E')
-    with open(filepath) as f:
+    with open(filepath, encoding='latin-1') as f:
         content = f.read().split()
+        return content
+
+
+def read_encrypted_file(filepath):
+    with open(filepath, encoding='latin-1') as f:
+        content = f.readlines()
         return content
 
 
@@ -80,46 +86,10 @@ def read_json_file(filepath):
         return False
 
 
-def make_document_index(path):
-    files = os.listdir(path)
-
-    curr_json = read_json_file(get_path('doc_index'))
-
-    # -1 because of 'current_value' key
-    if (len(files) == len(curr_json)-1):
-        print('Document index is already up to date.')
-        return [curr_json, []]
-
-    # update json file
-    changed_ids = []
-    current_value = curr_json['current_value'] if 'current_value' in curr_json else 0
-    if (len(files) > len(curr_json)-1):
-        for i in range(len(files)):
-            if (files[i] not in curr_json):
-                curr_json[files[i]] = current_value
-                changed_ids.append(current_value)
-                current_value += 1
-        curr_json['current_value'] = current_value
-    else:
-        delete_keys = []
-        for key, value in curr_json.items():
-            if (key not in files and key != 'current_value'):
-                delete_keys.append(key)
-                changed_ids.append(value)
-
-        for del_key in delete_keys:
-            curr_json.pop(del_key, None)
-
-    # save updated version
-    write_obj_to_json_file(curr_json, get_path('doc_index'))
-
-    return [curr_json, changed_ids]
-
-
 def get_path(short_path):
     paths = {
         'doc_index': '../Private/document_index.json',
-        'doc_index_switched': '../Private/document_index_switched.json',
+        'doc_index_switched': '../Server/document_index_switched.json',
 
         'inverted_index': '../Private/inverted_index.json',
 
@@ -130,9 +100,11 @@ def get_path(short_path):
 
         'ivs': '../Private/IVs/ivs.json',
 
-        'encrypted_index': '../Private/encrypted_index.json',
+        'encrypted_index': '../Server/encrypted_index.json',
 
         'data': '../Data/',
-        'server': '../Server/'
+        'server': '../Server/',
+        'user_enc': '../User/encrypted/',
+        'user_dec': '../User/decrypted/'
     }
     return paths[short_path]

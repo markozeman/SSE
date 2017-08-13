@@ -1,8 +1,6 @@
-import os
+from Crypto.Cipher import AES
 
-from cryptography.fernet import Fernet
-from Crypto.Cipher import DES3, AES
-import pyDes
+from shutil import copy
 
 from help_functions import *
 
@@ -28,7 +26,7 @@ class SSE:
         write_keys_to_file(keys, paths)
 
     def update_IVs_and_doc_index(self):
-        obj, changed_ids = make_document_index(get_path('data'))
+        obj, changed_ids = self.make_document_index(get_path('data'))
 
         curr_ivs = read_json_file(get_path('ivs'))
 
@@ -48,6 +46,44 @@ class SSE:
 
         write_obj_to_json_file(curr_ivs, get_path('ivs'))
 
+    def make_document_index(self, path):
+        files = os.listdir(path)
+
+        curr_json = read_json_file(get_path('doc_index'))
+
+        # -1 because of 'current_value' key
+        if (len(files) == len(curr_json) - 1):
+            print('Document index is already up to date.')
+            return [curr_json, []]
+
+        # update json file
+        changed_ids = []
+        current_value = curr_json['current_value'] if 'current_value' in curr_json else 0
+        if (len(files) > len(curr_json) - 1):
+            for i in range(len(files)):
+                if (files[i] not in curr_json):
+                    curr_json[files[i]] = current_value
+                    changed_ids.append(current_value)
+                    current_value += 1
+            curr_json['current_value'] = current_value
+        else:
+            delete_keys = []
+            for key, value in curr_json.items():
+                if (key not in files and key != 'current_value'):
+                    delete_keys.append(key)
+                    changed_ids.append(value)
+
+            for del_key in delete_keys:
+                curr_json.pop(del_key, None)
+
+        # save updated version
+        write_obj_to_json_file(curr_json, get_path('doc_index'))
+
+        # update switched document index
+        self.create_switched_document_index()
+
+        return [curr_json, changed_ids]
+
     def encrypt(self, key, IV, message):
         # key and IV are bytes, message is list of strings
         # returns list of bytes
@@ -55,7 +91,9 @@ class SSE:
 
         ciphertext = []
         for m in message:
+            # TODO
             cipher = aes.encrypt(pad(string_2_bytes(m, 'utf-8')))
+            # cipher = aes.encrypt(pad(string_2_bytes(m, 'latin-1')))
             ciphertext.append(cipher)
         return ciphertext
 
@@ -66,7 +104,9 @@ class SSE:
 
         plaintext = []
         for cipher in ciphertext:
+            # TODO
             plain = unpad(aes.decrypt(cipher)).decode()
+            # plain = bytes_2_string(unpad(aes.decrypt(cipher)))
             plaintext.append(plain)
         return plaintext
 
@@ -138,7 +178,7 @@ class SSE:
                 iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
                 ciphertext = bytes_2_string(self.encrypt(index_key, iv, [word])[0])
                 encrypted_index[ciphertext] = doc_id
-        print(len(encrypted_index), encrypted_index)
+        # print(len(encrypted_index), encrypted_index)
 
         write_obj_to_json_file(encrypted_index, get_path('encrypted_index'))
 
@@ -165,21 +205,76 @@ class SSE:
             new_path = files_destination + file
             write_to_file(new_path, ciphertext)
 
+    def generate_search_token(self, keyword):
+        index_key = read_bin_file(get_path('index_key'))
+        ivs = read_json_file(get_path('ivs'))
+
+        search_token = []
+
+        for doc_id, iv in ivs.items():
+            search_token += self.encrypt(index_key, string_2_bytes(iv, 'latin-1'), [keyword])
+
+        print(search_token)
+        return search_token
+
+    def search(self, search_token):
+        encrypted_index = read_json_file(get_path('encrypted_index'))
+        doc_index_switched = read_json_file(get_path('doc_index_switched'))
+        str_search_token = [bytes_2_string(token) for token in search_token]
+
+        doc_ids2return = [encrypted_index[token] for token in str_search_token if token in encrypted_index]
+        print(doc_ids2return)
+
+        for doc_id in doc_ids2return:
+            file = doc_index_switched[str(doc_id)]
+            filepath = get_path('server') + file
+            # copy encrypted file to user
+            copy(filepath, get_path('user_enc'))
+
+    def decrypt_documents(self):
+        doc_index = read_json_file(get_path('doc_index'))
+        doc_key = read_bin_file(get_path('document_key'))
+        ivs = read_json_file(get_path('ivs'))
+
+        files = os.listdir(get_path('user_enc'))
+
+        for file in files:
+            content = read_encrypted_file(get_path('user_enc') + file)
+            content_bytes = [string_2_bytes(c, 'latin-1') for c in content]
+            print(file)
+            print(content)
+            print(content_bytes)
+            doc_id = doc_index[file]
+            iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
+            print(doc_id)
+            print(iv)
+
+            plaintext = self.decrypt(doc_key, iv, content_bytes)
+            print(plaintext)
+
+            print()
+
+
+
+
+
 
 
 if __name__ == '__main__':
     sse = SSE()
 
-    sse.update_IVs_and_doc_index()
-
-    # sse.encrypt_documents(get_path('data'), get_path('server'))
-    #
+    # sse.update_IVs_and_doc_index()
+    # sse.create_switched_document_index()
     # sse.create_inverted_keyword_index(get_path('data'))
-
     # sse.encrypt_index()
+    # sse.encrypt_documents(get_path('data'), get_path('server'))
+
+    # token = sse.generate_search_token('kruh')
+    # sse.search(token)
+
+    sse.decrypt_documents()
 
 
-    # sse.update_inverted_keyword_index(['text_18.txt'])
 
     '''
     key = read_bin_file(get_path('document_key'))
