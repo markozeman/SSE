@@ -91,9 +91,7 @@ class SSE:
 
         ciphertext = []
         for m in message:
-            # TODO
             cipher = aes.encrypt(pad(string_2_bytes(m, 'utf-8')))
-            # cipher = aes.encrypt(pad(string_2_bytes(m, 'latin-1')))
             ciphertext.append(cipher)
         return ciphertext
 
@@ -104,9 +102,7 @@ class SSE:
 
         plaintext = []
         for cipher in ciphertext:
-            # TODO
             plain = unpad(aes.decrypt(cipher)).decode()
-            # plain = bytes_2_string(unpad(aes.decrypt(cipher)))
             plaintext.append(plain)
         return plaintext
 
@@ -240,21 +236,15 @@ class SSE:
 
         for file in files:
             content = read_encrypted_file(get_path('user_enc') + file)
-            content_bytes = [string_2_bytes(c, 'latin-1') for c in content]
-            print(file)
-            print(content)
-            print(content_bytes)
+
             doc_id = doc_index[file]
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
-            print(doc_id)
-            print(iv)
 
-            plaintext = self.decrypt(doc_key, iv, content_bytes)
-            print(plaintext)
+            plaintext = self.decrypt(doc_key, iv, content)
+            plaintext = '\n'.join(map(str, plaintext))
 
-            print()
-
-
+            # write to decrypted folder
+            write_to_file(get_path('user_dec') + file, plaintext)
 
 
 
@@ -269,7 +259,7 @@ if __name__ == '__main__':
     # sse.encrypt_index()
     # sse.encrypt_documents(get_path('data'), get_path('server'))
 
-    # token = sse.generate_search_token('kruh')
+    # token = sse.generate_search_token('češnja')
     # sse.search(token)
 
     sse.decrypt_documents()

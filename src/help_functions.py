@@ -18,15 +18,24 @@ def write_to_bin_file(filepath, content):
 def read_file(filepath):
     # regex_remove = re.compile('[,\.!?]')
     # regex_remove.sub('', 'ab3d*E')
-    with open(filepath, encoding='latin-1') as f:
+    with open(filepath, encoding='utf-8') as f:
         content = f.read().split()
         return content
 
 
 def read_encrypted_file(filepath):
-    with open(filepath, encoding='latin-1') as f:
+    with open(filepath) as f:
         content = f.readlines()
-        return content
+
+        bytes_content = []
+        for i in range(len(content)):
+            if (i == len(content)-1):   # last line
+                b = string_2_bytes(content[i], 'latin-1')
+            else:
+                b = string_2_bytes(content[i][:-1], 'latin-1')
+            bytes_content.append(b)
+
+        return bytes_content
 
 
 def read_bin_file(filepath):
