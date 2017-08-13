@@ -246,6 +246,14 @@ class SSE:
             # write to decrypted folder
             write_to_file(get_path('user_dec') + file, plaintext)
 
+    def delete_user_directrories(self):
+        enc_path = get_path('user_enc')
+        dec_path = get_path('user_dec')
+        enc_files = os.listdir(enc_path)
+        dec_files = os.listdir(dec_path)
+        [os.remove(enc_path + f) for f in enc_files]
+        [os.remove(dec_path + f) for f in dec_files]
+
 
 
 
@@ -261,8 +269,10 @@ if __name__ == '__main__':
 
     # token = sse.generate_search_token('češnja')
     # sse.search(token)
+    #
+    # sse.decrypt_documents()
 
-    sse.decrypt_documents()
+    # sse.delete_user_directrories()
 
 
 
