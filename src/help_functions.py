@@ -16,10 +16,17 @@ def write_to_bin_file(filepath, content):
 
 
 def read_file(filepath):
-    # regex_remove = re.compile('[,\.!?]')
-    # regex_remove.sub('', 'ab3d*E')
-    with open(filepath, encoding='utf-8') as f:
+    regex_remove = re.compile('[,\.!?]')
+    with open(filepath) as f:
         content = f.read().split()
+        content = [regex_remove.sub('', c) for c in content]
+        return content
+
+
+def enc_read_file(filepath):
+    with open(filepath) as f:
+        content = f.read().split(' ')
+        # content = [c.replace('\n', '\r') for c in content]
         return content
 
 
@@ -65,6 +72,10 @@ def get_random_bytes(length):
 
 def bytes_2_string(B):
     return B.decode("latin-1")
+
+
+def bytes_2_utf8_string(B):
+    return B.decode("utf-8")
 
 
 def string_2_bytes(s, encoding):
