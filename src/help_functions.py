@@ -16,7 +16,7 @@ def write_to_bin_file(filepath, content):
 
 
 def read_file(filepath):
-    regex_remove = re.compile('[,\.!?]')
+    regex_remove = re.compile('[,\.!?():;]')
     with open(filepath) as f:
         content = f.read().split()
         content = [regex_remove.sub('', c) for c in content]
