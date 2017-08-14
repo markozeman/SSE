@@ -103,21 +103,10 @@ class SSE:
         plaintext = []
         for cipher in ciphertext:
             if (len(cipher) > 0):
-                # aes_dec_cipher_unpad = unpad(aes.decrypt(cipher))
-                # print('aes_dec_cipher_unpad', aes_dec_cipher_unpad)
-
                 plain = unpad(aes.decrypt(cipher)).decode()
-                # plain = unpad(aes.decrypt(cipher)).decode('latin-1').encode('utf-8')
-                # plain = unicode(unpad(aes.decrypt(cipher)), errors='replace')
-                # plain = bytes_2_string(unpad(aes.decrypt(cipher)))
-                # plain = bytes_2_string(aes.decrypt(cipher))
-
-                # print('plain', plain)
                 plaintext.append(plain)
-                # plaintext.append(plain.decode())
             else:
                 print('Cipher has no length.')
-            # print()
         return plaintext
 
     def create_switched_document_index(self):
@@ -143,7 +132,7 @@ class SSE:
         # print(all_words)
 
         inverted_index = {word: [txt for txt, words in keyword_index.items() if word in words] for word in all_words}
-        print(inverted_index)
+        # print(inverted_index)
 
         write_obj_to_json_file(inverted_index, get_path('inverted_index'))
 
@@ -164,8 +153,8 @@ class SSE:
 
         curr_inverted_index = read_json_file(get_path('inverted_index'))
         new_inverted_index = {word: [txt for txt, words in new_keyword_index.items() if word in words] for word in all_words}
-        print(curr_inverted_index)
-        print(new_inverted_index)
+        # print(curr_inverted_index)
+        # print(new_inverted_index)
 
         for key, value in new_inverted_index.items():
             if (key in curr_inverted_index):
@@ -174,7 +163,7 @@ class SSE:
             else:
                 curr_inverted_index[key] = value
 
-        print(curr_inverted_index)
+        # print(curr_inverted_index)
         write_obj_to_json_file(curr_inverted_index, get_path('inverted_index'))
 
     def encrypt_index(self):
@@ -208,9 +197,6 @@ class SSE:
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
 
             cipherbytes = self.encrypt(key, iv, content)
-
-            print('encrypt file', file)
-            print('cipherbytes', cipherbytes)
 
             ciphertext = [bytes_2_string(cb) for cb in cipherbytes]
             ciphertext = ' '.join(map(str, ciphertext))
@@ -253,44 +239,25 @@ class SSE:
         for file in files:
             content = enc_read_file(get_path('user_enc') + file)
             content = [string_2_bytes(c, 'latin-1') for c in content]
-
-            repaired = []
-            i = 0
-            while (i < len(content)):
-                if (not (len(content[i]) / 16).is_integer()):
-                    print(i, content[i])
-                    combine = content[i] + string_2_bytes(' ', 'latin-1') + content[i + 1]
-                    i += 1
-
-                    while (not (len(combine) / 16).is_integer()):
-                        combine = content[i] + string_2_bytes(' ', 'latin-1') + content[i + 1]
-                        i += 1
-                    repaired.append(combine)
-
-                else:
-                    repaired.append(content[i])
-                i += 1
-
-            for r in repaired:
-                if (len(r) != 16):
-                    print('no 16', len(r))
+            content = repair_data(content)
 
             doc_id = doc_index[file]
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
 
-            print(file)
-            print('repaired', len(repaired), repaired)
+            plaintext = self.decrypt(doc_key, iv, content)
 
-            plaintext = self.decrypt(doc_key, iv, repaired)
-            print(plaintext)
-            plaintext = ' '.join(map(str, plaintext))
+            stripped_plaintext = []
+            for p in plaintext:
+                if not p.isalnum() and len(p) > 1:
+                    strip_p = re.sub(r'[^0-9a-žA-Ž\-]+', '', p)
+                    stripped_plaintext.append(strip_p)
+                else:
+                    stripped_plaintext.append(p)
 
-            print(plaintext)
-
-            print('\n\n')
+            stripped_plaintext = ' '.join(map(str, stripped_plaintext))
 
             # write to decrypted folder
-            write_to_file(get_path('user_dec') + file, plaintext)
+            write_to_file(get_path('user_dec') + file, stripped_plaintext)
 
     def delete_user_directories(self):
         enc_path = get_path('user_enc')
@@ -318,24 +285,24 @@ if __name__ == '__main__':
     # sse.encrypt_index()
     # sse.encrypt_documents(get_path('data'), get_path('server'))
 
-    # sse.delete_user_directories()
-    #
-    # token = sse.generate_search_token('jugovzhodni')
-    # sse.search(token)
-    # sse.decrypt_documents()
+    sse.delete_user_directories()
+
+    token = sse.generate_search_token('predniki')
+    sse.search(token)
+    sse.decrypt_documents()
 
     # sse.delete_user_directories()
     # sse.delete_server_text_files()
 
 
-
+    '''
     key = read_bin_file(get_path('document_key'))
 
     res = read_json_file(get_path('ivs'))
     # print(res)
     iv = string_2_bytes(res['7'], 'latin-1')
 
-    mess = read_file(get_path('data') + 'text_SLO.txt')
+    mess = read_file(get_path('data') + 'text_SLO_ZGO.txt')
     print('mess', mess)
 
     cipher = sse.encrypt(key, iv, mess)
@@ -355,54 +322,61 @@ if __name__ == '__main__':
     # print(content)
 
     content = [string_2_bytes(c, 'latin-1') for c in content]
-    print('\ncontent')
-    print(content)
-    print('len content: ', len(content))
+    # print('\ncontent')
+    # print(content)
+    # print('len content: ', len(content))
 
     repaired = []
     i = 0
     while (i < len(content)):
-        if (len(content[i]) == 15 and len(content[i+1]) != 0):
-        # if (content[i] == b'\x1f\xc8\x84\xd6\xf4\x8d\xba\xbb\nb\xb5\x82W}\xf5'):
-            rep = content[i].replace(b'\n', b'\r\n')
-            print('\ncontent[i]', content[i])
-            print('rep', rep)
-            print(rep == content[i])
-            print(len(content[i+1]))
+        val = content[i]
+        if (i < len(content)-1):
+            next_val = content[i+1]
+        if (len(val) == 15 and len(next_val) != 0):
+            if (b'\n' in val):
+                new_val = val.replace(b'\n', b'\r\n')
+            else:
+                new_val = b' ' + val
 
-            print('\n\n\n55555555555555555555555555555555555555\n\n\n')
-            repaired.append(rep)
+            # print('\nval', val)
+            # print('rep', new_val)
+            # print(new_val == val)
+            # print(len(next_val))
+
+            repaired.append(new_val)
             i += 1
             continue
-        elif not (len(content[i]) / 16).is_integer():
-
-            print(i)
-            print(content[i], content[i+1])
-            repaired.append(content[i] + string_2_bytes(' ', 'latin-1') + content[i+1])
+        elif not (len(val) / 16).is_integer():
+            # print(i)
+            # print(val, next_val)
+            repaired.append(val + string_2_bytes(' ', 'latin-1') + next_val)
             i += 1
-        else:
-            repaired.append(content[i])
+        elif (len(val) != 0):
+            repaired.append(val)
         i += 1
 
     print('\n\nrepaired', len(repaired), repaired)
 
-    for i in range(len(repaired)):
-        if (len(repaired[i]) != len(cipher[i])):
-            print(i)
-            print(len(repaired[i]), len(cipher[i]))
-            print(repaired[i], cipher[i])
-            # print(mess[i])
-            print()
+    # repaired[87] = b' \xa9*\xf4U,\xa2V\xc2\x8a\xa8tf=E\xf3'
 
-    print(len(cipher))
-    print(len(repaired))
-    print(len(cipher) == len(repaired))
+
+    # for i in range(len(repaired)):
+    #     if (len(repaired[i]) != len(cipher[i])):
+    #         print(i)
+    #         print(len(repaired[i]), len(cipher[i]))
+    #         print(repaired[i], cipher[i])
+            # print(mess[i])
+            # print()
+
+    # print(len(cipher))
+    # print(len(repaired))
+    # print(len(cipher) == len(repaired))
 
 
     sse_2 = SSE()
     plain = sse_2.decrypt(key, iv, repaired)
     print(plain)
-
+    '''
 
 
 

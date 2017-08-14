@@ -16,7 +16,7 @@ def write_to_bin_file(filepath, content):
 
 
 def read_file(filepath):
-    regex_remove = re.compile('[,\.!?():;]')
+    regex_remove = re.compile('[,\.\[\]!?():;]')
     with open(filepath) as f:
         content = f.read().split()
         content = [regex_remove.sub('', c) for c in content]
@@ -104,6 +104,30 @@ def read_json_file(filepath):
     except IOError:
         print('Cannot open file at: ', filepath)
         return False
+
+
+def repair_data(content):
+    repaired = []
+    i = 0
+    while (i < len(content)):
+        val = content[i]
+        if (i < len(content) - 1):
+            next_val = content[i + 1]
+
+        if (len(val) == 15 and len(next_val) != 0):
+            if (b'\n' in val):
+                new_val = val.replace(b'\n', b'\r\n')
+            else:
+                new_val = b' ' + val
+            repaired.append(new_val)
+        elif not (len(val) / 16).is_integer():
+            repaired.append(val + string_2_bytes(' ', 'latin-1') + next_val)
+            i += 1
+        elif (len(val) != 0):
+            repaired.append(val)
+        i += 1
+
+    return repaired
 
 
 def get_path(short_path):
