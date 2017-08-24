@@ -279,20 +279,26 @@ class SSE:
 if __name__ == '__main__':
     sse = SSE()
 
+    # sse.generate_and_save_keys()
     # sse.update_IVs_and_doc_index()
     # sse.create_switched_document_index()
     # sse.create_inverted_keyword_index(get_path('data'))
     # sse.encrypt_index()
     # sse.encrypt_documents(get_path('data'), get_path('server'))
 
-    sse.delete_user_directories()
+    # sse.delete_user_directories()
 
-    token = sse.generate_search_token('predniki')
-    sse.search(token)
-    sse.decrypt_documents()
+    # token = sse.generate_search_token('kruh')
+    # sse.search(token)
+    # sse.decrypt_documents()
+
+
 
     # sse.delete_user_directories()
     # sse.delete_server_text_files()
+
+
+
 
 
     '''

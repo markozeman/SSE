@@ -94,7 +94,7 @@ def write_keys_to_file(keys, filepaths, bin=False):
 
 def write_obj_to_json_file(obj, filepath):
     with open(filepath, 'w') as outfile:
-        json.dump(obj, outfile)
+        json.dump(obj, outfile, indent=4)
 
 
 def read_json_file(filepath):
