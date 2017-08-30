@@ -3,6 +3,7 @@ from Crypto.Cipher import AES
 from shutil import copy
 
 from help_functions import *
+from OPE import OPE
 
 
 class SSE:
@@ -275,7 +276,6 @@ class SSE:
 
 
 
-
 if __name__ == '__main__':
     sse = SSE()
 
@@ -300,17 +300,28 @@ if __name__ == '__main__':
 
 
 
-
     '''
     key = read_bin_file(get_path('document_key'))
 
     res = read_json_file(get_path('ivs'))
     # print(res)
-    iv = string_2_bytes(res['7'], 'latin-1')
+    iv = string_2_bytes(res['2'], 'latin-1')
 
-    mess = read_file(get_path('data') + 'text_SLO_ZGO.txt')
-    print('mess', mess)
+    # mess = read_file(get_path('data') + 'text_SLO_ZGO.txt')
+    # print('mess', mess)
 
+    a = sse.encrypt(key, iv, ['personal//name//Marko'])
+    b = sse.encrypt(key, iv, ['personal//name//Janez'])
+
+    dec_A = sse.decrypt(key, get_random_bytes(16), a)
+    dec_B = sse.decrypt(key, iv, b)
+
+    print(a)
+    print(b)
+    print(dec_A)
+    print(dec_B)
+
+    
     cipher = sse.encrypt(key, iv, mess)
     print('cipher', cipher)
 
