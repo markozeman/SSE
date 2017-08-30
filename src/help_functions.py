@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from collections import OrderedDict
 
 
 def write_to_file(filepath, content):
@@ -104,6 +105,16 @@ def read_json_file(filepath):
     except IOError:
         print('Cannot open file at: ', filepath)
         return False
+
+
+def read_ordered_json_file(filepath):
+    try:
+        with open(filepath) as data_file:
+            return json.load(data_file, object_pairs_hook=OrderedDict)
+    except IOError:
+        print('Cannot open file at: ', filepath)
+        return False
+
 
 
 def repair_data(content):
