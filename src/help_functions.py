@@ -31,6 +31,11 @@ def enc_read_file(filepath):
         return content
 
 
+def read_file_by_lines(filepath):
+    with open(filepath) as f:
+        return f.read().splitlines()
+
+
 def read_encrypted_file(filepath):
     with open(filepath) as f:
         content = f.readlines()
@@ -163,3 +168,21 @@ def get_path(short_path):
         'user_dec': '../User/decrypted/'
     }
     return paths[short_path]
+
+
+def get_longer_path(short_path):
+    return '../' + get_path(short_path)
+
+
+def correct_lines(enc_list):
+    lines = enc_list.split('\n')
+    corrected_lines = []
+    for i in range(len(lines)):
+        if ('--' not in lines[i]):
+            corrected_lines = corrected_lines[:-1]
+            line = lines[i - 1] + '\n' + lines[i]
+            corrected_lines.append(line)
+        else:
+            corrected_lines.append(lines[i])
+
+    return corrected_lines
