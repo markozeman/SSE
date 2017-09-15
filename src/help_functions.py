@@ -198,3 +198,31 @@ def correct_lines(enc_list):
             corrected_lines.append(lines[i])
 
     return corrected_lines
+
+
+def make_json_from_decrypted_file(ordered_dict):
+    json = OrderedDict()
+    for key, value in ordered_dict.items():
+        if (len(key) == 1):
+            json[value] = OrderedDict()
+        else:
+            last_char = key[-1]
+            if (last_char != '*'):
+                key_chars_without_last = key[:-1]
+                keys = [ordered_dict[key_chars_without_last[:(i + 1)]] for i in range(len(key_chars_without_last))]
+                curr_json = json
+                for k in keys:
+                    curr_json = curr_json[k]
+
+                curr_json[value] = OrderedDict()
+
+            else:  # final data
+                key_chars_without_last_2 = key[:-2]
+                keys = [ordered_dict[key_chars_without_last[:(i + 1)]] for i in range(len(key_chars_without_last_2))]
+                curr_json = json
+                for k in keys:
+                    curr_json = curr_json[k]
+
+                curr_json[ordered_dict[key[:-1]]] = value
+
+    return json

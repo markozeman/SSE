@@ -24,7 +24,7 @@ class OPE:
             # print(file, content)
 
             content = self.recursive_json(json, [], [])
-            print(content)
+            # print(content)
 
             keyword_index[index_json[file]] = content
             all_words += content
@@ -37,7 +37,7 @@ class OPE:
         # print(inverted_index)
 
         ordered_inverted_index = OrderedDict(sorted(inverted_index.items(), key=lambda x: x[0]))
-        print(ordered_inverted_index)
+        # print(ordered_inverted_index)
 
         write_obj_to_json_file(ordered_inverted_index, get_longer_path('inverted_index'))
 
@@ -91,40 +91,17 @@ class OPE:
             doc_id = doc_index[file]
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
 
-            # if (str(file).startswith('Janez')):
             encryption_list = self.recursive_encryption(json, [], [], key, iv)
 
-
-            print(file)
-            print(type(encryption_list), encryption_list)
-            print('+++++++++++++++++++++++++++++++++++')
+            # print(file)
+            # print(type(encryption_list), encryption_list)
+            # print('+++++++++++++++++++++++++++++++++++')
 
             enc_list = '\n'.join(encryption_list)
             # print(enc_list)
 
             new_path = files_destination + file.split('.')[0] + '.txt'
             write_to_file(new_path, repr(enc_list))
-
-
-        '''
-        test = read_file_string('../../Server/JanezNovak.txt').split('\\n')
-        print(test)
-
-        for enc in test:
-            h = enc.split('--')[1]
-            print(h)
-
-            h = string_2_bytes(h, 'latin-1')
-            print(h)
-
-            h = remove_double_backslashes(h)
-            print(h)
-
-            dec = self.sse.decrypt(key, string_2_bytes(ivs['6'], 'latin-1'), [h])
-            print(dec)
-
-            print()
-        '''
 
 
     def recursive_encryption(self, json, path, lst, doc_key, iv):
@@ -139,7 +116,7 @@ class OPE:
             if isinstance(value, dict):
                 self.recursive_encryption(value, path, lst, doc_key, iv)
             else:
-                path.append('0')
+                path.append('*')
                 cipherbytes = self.sse.encrypt(doc_key, iv, [value])
                 ciphertext = bytes_2_string(cipherbytes[0])
                 lst.append(''.join(path) + '--' + ciphertext)
@@ -181,31 +158,33 @@ class OPE:
         ivs = read_json_file(get_longer_path('ivs'))
 
         files = os.listdir(get_longer_path('user_enc'))
-        print(files)
-
 
         for file in files:
-            content = (get_longer_path('user_enc') + file)
-            content = [string_2_bytes(c, 'latin-1') for c in content]
-            content = repair_data(content)
+            file_name = str(file.split('.')[0]) + '.json'
 
-            doc_id = doc_index[file]
+            doc_id = doc_index[file_name]
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
 
-            plaintext = self.decrypt(doc_key, iv, content)
+            content = read_file_string(get_longer_path('user_enc') + file).split('\\n')
 
-            stripped_plaintext = []
-            for p in plaintext:
-                if not p.isalnum() and len(p) > 1:
-                    strip_p = re.sub(r'[^0-9a-žA-Ž\-]+', '', p)
-                    stripped_plaintext.append(strip_p)
-                else:
-                    stripped_plaintext.append(p)
+            ordered_dict = OrderedDict()
+            for item in content:
+                item_split = item.split('--')
+                item_num = item_split[0]
+                item_hash = string_2_bytes(item_split[1], 'latin-1')
+                item_hash = remove_double_backslashes(item_hash)
 
-            stripped_plaintext = ' '.join(map(str, stripped_plaintext))
+                decrypted_hash = self.sse.decrypt(doc_key, iv, [item_hash])
+
+                ordered_dict[item_num] = decrypted_hash[0]
+
+            json = make_json_from_decrypted_file(ordered_dict)
 
             # write to decrypted folder
-            # write_to_file(get_path('user_dec') + file, stripped_plaintext)
+            write_obj_to_json_file(json, get_longer_path('user_dec') + file_name)
+
+
+
 
 
 if __name__ == '__main__':
@@ -215,6 +194,6 @@ if __name__ == '__main__':
     # ope.encrypt_index()
     # ope.encrypt_documents()
 
-    token = ope.generate_search_token('personal//firstName//Janez')
-    ope.search(token)
-    # ope.decrypt_documents()
+    # token = ope.generate_search_token('personal//firstName//Janez')
+    # ope.search(token)
+    ope.decrypt_documents()
