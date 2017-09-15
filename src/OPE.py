@@ -1,7 +1,7 @@
 from Crypto.Cipher import AES
 from collections import OrderedDict
 
-import copy
+from shutil import copy
 
 from help_functions import *
 
@@ -91,21 +91,22 @@ class OPE:
             doc_id = doc_index[file]
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
 
-            if (str(file).startswith('Janez')):
-                encryption_list = self.recursive_encryption(json, [], [], key, iv)
+            # if (str(file).startswith('Janez')):
+            encryption_list = self.recursive_encryption(json, [], [], key, iv)
 
 
-                print(file)
-                print(type(encryption_list), encryption_list)
-                print('+++++++++++++++++++++++++++++++++++')
+            print(file)
+            print(type(encryption_list), encryption_list)
+            print('+++++++++++++++++++++++++++++++++++')
 
-                enc_list = '\n'.join(encryption_list)
-                # print(enc_list)
+            enc_list = '\n'.join(encryption_list)
+            # print(enc_list)
 
-                new_path = files_destination + file.split('.')[0] + '.txt'
-                write_to_file(new_path, repr(enc_list))
+            new_path = files_destination + file.split('.')[0] + '.txt'
+            write_to_file(new_path, repr(enc_list))
 
 
+        '''
         test = read_file_string('../../Server/JanezNovak.txt').split('\\n')
         print(test)
 
@@ -124,6 +125,7 @@ class OPE:
             print(dec)
 
             print()
+        '''
 
 
     def recursive_encryption(self, json, path, lst, doc_key, iv):
@@ -132,7 +134,6 @@ class OPE:
             curr_path = str(list(json.keys()).index(key))
             path.append(curr_path)
             cipherbytes = self.sse.encrypt(doc_key, iv, [key])
-            print('cipherbytes', cipherbytes)
             ciphertext = bytes_2_string(cipherbytes[0])
             lst.append(''.join(path) + '--' + ciphertext)
 
@@ -149,6 +150,30 @@ class OPE:
         return lst
 
 
+    def generate_search_token(self, keyword):
+        index_key = read_bin_file(get_longer_path('index_key'))
+        ivs = read_json_file(get_longer_path('ivs'))
+
+        search_token = []
+        for doc_id, iv in ivs.items():
+            search_token += self.sse.encrypt(index_key, string_2_bytes(iv, 'latin-1'), [keyword])
+
+        return search_token
+
+
+    def search(self, search_token):
+        encrypted_index = read_json_file(get_longer_path('encrypted_index'))
+        doc_index_switched = read_json_file(get_longer_path('doc_index_switched'))
+        str_search_token = [bytes_2_string(token) for token in search_token]
+
+        doc_ids2return = [encrypted_index[token] for token in str_search_token if token in encrypted_index]
+        print(doc_ids2return)
+
+        for doc_id in doc_ids2return:
+            file = doc_index_switched[str(doc_id)]
+            filepath = get_longer_path('server') + file.split('.')[0] + '.txt'
+            # copy encrypted file to user
+            copy(filepath, get_longer_path('user_enc'))
 
 
 
@@ -158,4 +183,7 @@ if __name__ == '__main__':
 
     # ope.create_inverted_keyword_index()
     # ope.encrypt_index()
-    ope.encrypt_documents()
+    # ope.encrypt_documents()
+
+    token = ope.generate_search_token('personal//firstName//Janez')
+    ope.search(token)
