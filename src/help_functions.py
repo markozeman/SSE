@@ -160,24 +160,24 @@ def repair_data(content):
 
 def get_path(short_path):
     paths = {
-        'doc_index': '../Private/document_index.json',
-        'doc_index_switched': '../Server/document_index_switched.json',
+        'doc_index': os.path.join('..', 'Private', 'document_index.json'),
+        'doc_index_switched': os.path.join('..', 'Server', 'document_index_switched.json'),
 
-        'inverted_index': '../Private/inverted_index.json',
+        'inverted_index': os.path.join('..', 'Private', 'inverted_index.json'),
 
-        'index_key': '../Private/keys/index_key',
-        'index_key_txt': '../Private/keys/index_key.txt',
-        'document_key': '../Private/keys/document_key',
-        'document_key_txt': '../Private/keys/document_key.txt',
+        'index_key': os.path.join('..', 'Private', 'keys', 'index_key'),
+        'index_key_txt': os.path.join('..', 'Private', 'keys', 'index_key.txt'),
+        'document_key': os.path.join('..', 'Private', 'keys', 'document_key'),
+        'document_key_txt': os.path.join('..', 'Private', 'keys', 'document_key.txt'),
 
-        'ivs': '../Private/IVs/ivs.json',
+        'ivs': os.path.join('..', 'Private', 'IVs', 'ivs.json'),
 
-        'encrypted_index': '../Server/encrypted_index.json',
+        'encrypted_index': os.path.join('..', 'Server', 'encrypted_index.json'),
 
-        'data': '../Data/',
-        'server': '../Server/',
-        'user_enc': '../User/encrypted/',
-        'user_dec': '../User/decrypted/'
+        'data': os.path.join('..', 'Data') + os.sep,
+        'server': os.path.join('..', 'Server') + os.sep,
+        'user_enc': os.path.join('..', 'User', 'encrypted') + os.sep,
+        'user_dec': os.path.join('..', 'User', 'decrypted') + os.sep,
     }
     return paths[short_path]
 

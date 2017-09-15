@@ -110,7 +110,6 @@ class OPE:
         test = read_file_string('../../Server/JanezNovak.txt').split('\\n')
         print(test)
 
-
         for enc in test:
             h = enc.split('--')[1]
             print(h)
@@ -176,6 +175,37 @@ class OPE:
             copy(filepath, get_longer_path('user_enc'))
 
 
+    def decrypt_documents(self):
+        doc_index = read_json_file(get_longer_path('doc_index'))
+        doc_key = read_bin_file(get_longer_path('document_key'))
+        ivs = read_json_file(get_longer_path('ivs'))
+
+        files = os.listdir(get_longer_path('user_enc'))
+        print(files)
+
+
+        for file in files:
+            content = (get_longer_path('user_enc') + file)
+            content = [string_2_bytes(c, 'latin-1') for c in content]
+            content = repair_data(content)
+
+            doc_id = doc_index[file]
+            iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
+
+            plaintext = self.decrypt(doc_key, iv, content)
+
+            stripped_plaintext = []
+            for p in plaintext:
+                if not p.isalnum() and len(p) > 1:
+                    strip_p = re.sub(r'[^0-9a-žA-Ž\-]+', '', p)
+                    stripped_plaintext.append(strip_p)
+                else:
+                    stripped_plaintext.append(p)
+
+            stripped_plaintext = ' '.join(map(str, stripped_plaintext))
+
+            # write to decrypted folder
+            # write_to_file(get_path('user_dec') + file, stripped_plaintext)
 
 
 if __name__ == '__main__':
@@ -187,3 +217,4 @@ if __name__ == '__main__':
 
     token = ope.generate_search_token('personal//firstName//Janez')
     ope.search(token)
+    # ope.decrypt_documents()
