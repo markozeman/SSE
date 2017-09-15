@@ -97,7 +97,7 @@ class OPE:
             # print(type(encryption_list), encryption_list)
             # print('+++++++++++++++++++++++++++++++++++')
 
-            enc_list = '\n'.join(encryption_list)
+            enc_list = '|||'.join(encryption_list)
             # print(enc_list)
 
             new_path = files_destination + file.split('.')[0] + '.txt'
@@ -165,7 +165,7 @@ class OPE:
             doc_id = doc_index[file_name]
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
 
-            content = read_file_string(get_longer_path('user_enc') + file).split('\\n')
+            content = read_file_string(get_longer_path('user_enc') + file).split('|||')
 
             ordered_dict = OrderedDict()
             for item in content:
@@ -184,6 +184,14 @@ class OPE:
             write_obj_to_json_file(json, get_longer_path('user_dec') + file_name)
 
 
+    def delete_user_directories(self):
+        enc_path = get_longer_path('user_enc')
+        dec_path = get_longer_path('user_dec')
+        enc_files = os.listdir(enc_path)
+        dec_files = os.listdir(dec_path)
+        [os.remove(enc_path + f) for f in enc_files]
+        [os.remove(dec_path + f) for f in dec_files]
+
 
 
 
@@ -194,6 +202,8 @@ if __name__ == '__main__':
     # ope.encrypt_index()
     # ope.encrypt_documents()
 
-    # token = ope.generate_search_token('personal//firstName//Janez')
-    # ope.search(token)
+    ope.delete_user_directories()
+
+    token = ope.generate_search_token('personal//firstName//Janez')
+    ope.search(token)
     ope.decrypt_documents()

@@ -70,7 +70,7 @@ def read_bin_file(filepath):
 
 def read_file_string(filepath):
     with open(filepath) as f:
-        content = f.read().strip("'")
+        content = f.read().strip("'\"")
         return content
 
 
@@ -226,3 +226,27 @@ def make_json_from_decrypted_file(ordered_dict):
                 curr_json[ordered_dict[key[:-1]]] = value
 
     return json
+
+
+def path_strings(string):
+    paths = {
+        'birthDate': 'personal//birthDate//',
+        'firstName': 'personal//firstName//',
+        'lastName': 'personal//lastName//',
+
+        'houseNumber': 'personal//address//houseNumber//',
+        'street': 'personal//address//street//',
+        'country': 'personal//address//country//',
+        'city': 'personal//address//city//',
+        'postCode': 'personal//address//postCode//',
+
+        'type': 'type//',
+
+        'temperature': 'health//temperature//',
+        'heartRate': 'health//heartRate//',
+        'diastolic': 'health//diastolic//',
+        'systolic': 'health//systolic//',
+        'sp02': 'health//sp02//',
+    }
+    return paths[string]
+
