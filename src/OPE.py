@@ -91,21 +91,39 @@ class OPE:
             doc_id = doc_index[file]
             iv = string_2_bytes(ivs[str(doc_id)], 'latin-1')
 
-            encryption_list = self.recursive_encryption(json, [], [], key, iv)
+            if (str(file).startswith('Janez')):
+                encryption_list = self.recursive_encryption(json, [], [], key, iv)
 
-            print(file)
-            print(type(encryption_list), encryption_list)
-            print('+++++++++++++++++++++++++++++++++++')
 
-            enc_list = '\n'.join(encryption_list)
-            print(enc_list)
+                print(file)
+                print(type(encryption_list), encryption_list)
+                print('+++++++++++++++++++++++++++++++++++')
 
-            new_path = files_destination + file.split('.')[0] + '.txt'
-            write_to_file(new_path, enc_list)
+                enc_list = '\n'.join(encryption_list)
+                # print(enc_list)
 
-        test = read_file_by_lines('../../Server/JanezNovak.txt')
+                new_path = files_destination + file.split('.')[0] + '.txt'
+                write_to_file(new_path, repr(enc_list))
+
+
+        test = read_file_string('../../Server/JanezNovak.txt').split('\\n')
         print(test)
 
+
+        for enc in test:
+            h = enc.split('--')[1]
+            print(h)
+
+            h = string_2_bytes(h, 'latin-1')
+            print(h)
+
+            h = remove_double_backslashes(h)
+            print(h)
+
+            dec = self.sse.decrypt(key, string_2_bytes(ivs['6'], 'latin-1'), [h])
+            print(dec)
+
+            print()
 
 
     def recursive_encryption(self, json, path, lst, doc_key, iv):
@@ -114,6 +132,7 @@ class OPE:
             curr_path = str(list(json.keys()).index(key))
             path.append(curr_path)
             cipherbytes = self.sse.encrypt(doc_key, iv, [key])
+            print('cipherbytes', cipherbytes)
             ciphertext = bytes_2_string(cipherbytes[0])
             lst.append(''.join(path) + '--' + ciphertext)
 

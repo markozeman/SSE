@@ -1,7 +1,13 @@
 import os
 import json
 import re
+import ast
 from collections import OrderedDict
+
+
+
+def remove_double_backslashes(b):
+    return ast.literal_eval(str(b).replace('\\\\', '\\'))
 
 
 def write_to_file(filepath, content):
@@ -60,6 +66,12 @@ def read_bin_file(filepath):
             byte = f.read(1)
             B.append(byte)
         return b''.join(B)
+
+
+def read_file_string(filepath):
+    with open(filepath) as f:
+        content = f.read().strip("'")
+        return content
 
 
 def pad(data):
