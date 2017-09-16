@@ -280,7 +280,13 @@ def get_docs2return(encrypted_index, str_search_token, operator):
 
         ordered_list = list(encrypted_index.items())
 
-        if (operator == 'gt'):
+        if (operator == 'ne'):
+            from_start_to_end = set([i for i in range(start_index, end_index + 1)])
+            indices_set = set(indices)
+            not_equals = from_start_to_end - indices_set
+            for ind in not_equals:
+                doc_ids2return.append(ordered_list[ind][1])
+        elif (operator == 'gt'):
             for i in range(index + 1, end_index + 1):
                 doc_ids2return.append(ordered_list[i][1])
         elif (operator == 'gte'):

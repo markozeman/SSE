@@ -140,7 +140,7 @@ class OPE:
 
 
     def search(self, search_token, operator):
-        # possible operators: 'eq', 'gt', 'gte', 'lt', 'lte'
+        # possible operators: 'eq', 'ne', 'gt', 'gte', 'lt', 'lte'
         encrypted_index = read_ordered_json_file(get_longer_path('encrypted_index'))
         str_search_token = [bytes_2_string(token) for token in search_token]
 
