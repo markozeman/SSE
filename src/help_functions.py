@@ -293,6 +293,4 @@ def get_docs2return(encrypted_index, str_search_token, operator):
             for i in range(index, start_index - 1, -1):
                 doc_ids2return.append(ordered_list[i][1])
 
-        print(doc_ids2return)
-
     return doc_ids2return

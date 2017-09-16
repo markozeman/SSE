@@ -3,6 +3,8 @@ from collections import OrderedDict
 
 from shutil import copy
 
+from PyQt5.QtWidgets import QApplication, QWidget
+
 from help_functions import *
 
 import SSE
@@ -140,10 +142,19 @@ class OPE:
     def search(self, search_token, operator):
         # possible operators: 'eq', 'gt', 'gte', 'lt', 'lte'
         encrypted_index = read_ordered_json_file(get_longer_path('encrypted_index'))
-        doc_index_switched = read_json_file(get_longer_path('doc_index_switched'))
         str_search_token = [bytes_2_string(token) for token in search_token]
 
         doc_ids2return = get_docs2return(encrypted_index, str_search_token, operator)
+
+        # self.copy_encrypted_files_to_user(doc_ids2return)
+
+        return set(doc_ids2return)
+
+
+    def copy_encrypted_files_to_user(self, doc_ids2return):
+        doc_index_switched = read_json_file(get_longer_path('doc_index_switched'))
+
+        print(doc_ids2return)
 
         for doc_id in doc_ids2return:
             file = doc_index_switched[str(doc_id)]
@@ -195,6 +206,18 @@ class OPE:
 
 
 
+
+
+
+class SearhGUI(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+
+
+
+
 if __name__ == '__main__':
     ope = OPE()
 
@@ -202,8 +225,30 @@ if __name__ == '__main__':
     # ope.encrypt_index()
     # ope.encrypt_documents()
 
-    ope.delete_user_directories()
+    # ope.delete_user_directories()
+    #
+    # token = ope.generate_search_token(path_strings('heartRate') + '50')
+    # doc_ids_1 = ope.search(token, 'gt')
+    # print(doc_ids_1)
+    #
+    # token = ope.generate_search_token(path_strings('spO2') + '99')
+    # doc_ids_2 = ope.search(token, 'eq')
+    # print(doc_ids_2)
+    #
+    # intersection = doc_ids_1.intersection(doc_ids_2)
+    # print('intersection', intersection)
+    #
+    # union = doc_ids_1.union(doc_ids_2)
+    # print('union', union)
 
-    token = ope.generate_search_token(path_strings('heartRate') + '50')
-    ope.search(token, 'gt')
-    ope.decrypt_documents()
+
+    # ope.copy_encrypted_files_to_user(union)
+    # ope.decrypt_documents()
+
+
+    app = QApplication([])
+    w = SearhGUI()
+    w.show()
+    app.exec_()
+
+
