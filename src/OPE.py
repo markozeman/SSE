@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from shutil import copy
 
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QButtonGroup, QSpacerItem, QVBoxLayout, QSizePolicy
 
 from help_functions import *
 
@@ -204,15 +204,78 @@ class OPE:
         [os.remove(dec_path + f) for f in dec_files]
 
 
-
-
-
+class QString(object):
+    pass
 
 
 class SearhGUI(QWidget):
 
     def __init__(self):
         super().__init__()
+
+        self.height = 700
+        self.width = 720
+
+
+        self.setGeometry(700, 150, self.width, self.height)
+        self.setWindowTitle('SSE')
+
+        self.init_UI()
+
+
+    def init_UI(self):
+        ver_spacing = 100
+        hor_spacing = 20
+
+        left_bracket = QPushButton('(', self)
+        right_bracket = QPushButton(')', self)
+        left_bracket.move(hor_spacing, hor_spacing)
+        right_bracket.move(ver_spacing+hor_spacing, hor_spacing)
+
+        self.horizontal_line(0, 3*hor_spacing)
+
+        properties_widget = QWidget(self)
+        properties_widget.move(hor_spacing, 4*hor_spacing)
+        properties_button_group = QButtonGroup()
+        birth_date = QPushButton('birthDate', properties_widget)
+        first_name = QPushButton('firstName', properties_widget)
+        first_name.move(ver_spacing, 0)
+        last_name = QPushButton('lastName', properties_widget)
+        last_name.move(2*ver_spacing, 0)
+        street = QPushButton('street', properties_widget)
+        street.move(3*ver_spacing, 0)
+        house_number = QPushButton('houseNum', properties_widget)
+        house_number.move(4*ver_spacing, 0)
+        city = QPushButton('city', properties_widget)
+        city.move(5*ver_spacing, 0)
+        post_code = QPushButton('postCode', properties_widget)
+        post_code.move(6*ver_spacing, 0)
+        country = QPushButton('country', properties_widget)
+        country.move(0, 2*hor_spacing)
+        type_of = QPushButton('type', properties_widget)
+        type_of.move(ver_spacing, 2 * hor_spacing)
+        temperature = QPushButton('temperature', properties_widget)
+        temperature.move(2*ver_spacing, 2*hor_spacing)
+        heart_rate = QPushButton('heartRate', properties_widget)
+        heart_rate.move(3*ver_spacing, 2*hor_spacing)
+        diastolic = QPushButton('diastolic', properties_widget)
+        diastolic.move(4*ver_spacing, 2*hor_spacing)
+        systolic = QPushButton('systolic', properties_widget)
+        systolic.move(5*ver_spacing, 2*hor_spacing)
+        spO2 = QPushButton('spO2', properties_widget)
+        spO2.move(6*ver_spacing, 2*hor_spacing)
+
+        self.horizontal_line(0, 8*hor_spacing)
+
+
+
+
+    def horizontal_line(self, x, y):
+        horizontal_line = QWidget(self)
+        horizontal_line.setFixedSize(self.width, 1)
+        horizontal_line.setStyleSheet("background-color: black;")
+        horizontal_line.move(x, y)
+
 
 
 
@@ -250,5 +313,15 @@ if __name__ == '__main__':
     w = SearhGUI()
     w.show()
     app.exec_()
+
+
+    # def sayHello():
+    #     print ("Hello World!")
+    #
+    # app = QApplication([])
+    # button = QPushButton("Click me")
+    # button.clicked.connect(sayHello)
+    # button.show()
+    # app.exec_()
 
 
