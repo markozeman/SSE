@@ -137,13 +137,13 @@ class OPE:
         return search_token
 
 
-    def search(self, search_token):
-        encrypted_index = read_json_file(get_longer_path('encrypted_index'))
+    def search(self, search_token, operator):
+        # possible operators: 'eq', 'gt', 'gte', 'lt', 'lte'
+        encrypted_index = read_ordered_json_file(get_longer_path('encrypted_index'))
         doc_index_switched = read_json_file(get_longer_path('doc_index_switched'))
         str_search_token = [bytes_2_string(token) for token in search_token]
 
-        doc_ids2return = [encrypted_index[token] for token in str_search_token if token in encrypted_index]
-        print(doc_ids2return)
+        doc_ids2return = get_docs2return(encrypted_index, str_search_token, operator)
 
         for doc_id in doc_ids2return:
             file = doc_index_switched[str(doc_id)]
@@ -204,6 +204,6 @@ if __name__ == '__main__':
 
     ope.delete_user_directories()
 
-    token = ope.generate_search_token('personal//firstName//Janez')
-    ope.search(token)
+    token = ope.generate_search_token(path_strings('heartRate') + '50')
+    ope.search(token, 'gt')
     ope.decrypt_documents()

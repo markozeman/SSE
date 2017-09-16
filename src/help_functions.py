@@ -2,6 +2,7 @@ import os
 import json
 import re
 import ast
+import math
 from collections import OrderedDict
 
 
@@ -183,7 +184,7 @@ def get_path(short_path):
 
 
 def get_longer_path(short_path):
-    return '../' + get_path(short_path)
+    return os.path.join('..', get_path(short_path))
 
 
 def correct_lines(enc_list):
@@ -246,7 +247,52 @@ def path_strings(string):
         'heartRate': 'health//heartRate//',
         'diastolic': 'health//diastolic//',
         'systolic': 'health//systolic//',
-        'sp02': 'health//sp02//',
+        'spO2': 'health//spO2//',
     }
     return paths[string]
 
+
+def get_docs2return(encrypted_index, str_search_token, operator):
+    if (operator == 'eq'):
+        doc_ids2return = [encrypted_index[token] for token in str_search_token if token in encrypted_index]
+    else:
+        num_of_files = encrypted_index['number_of_files']
+        indices = []
+        doc_ids2return = []
+        for token in str_search_token:
+            if (token in encrypted_index):
+                index = list(encrypted_index.keys()).index(token)
+                indices.append(index)
+
+        indices.sort()
+
+        if (operator == 'lt' or operator == 'gte'):
+            index = indices[0]
+        elif (operator == 'gt' or operator == 'lte'):
+            index = indices[-1]
+
+        if (index % num_of_files != 0):
+            start_index = math.floor(index / num_of_files) * num_of_files + 1
+            end_index = math.ceil(index / num_of_files) * num_of_files
+        else:
+            start_index = index - num_of_files + 1
+            end_index = index
+
+        ordered_list = list(encrypted_index.items())
+
+        if (operator == 'gt'):
+            for i in range(index + 1, end_index + 1):
+                doc_ids2return.append(ordered_list[i][1])
+        elif (operator == 'gte'):
+            for i in range(index, end_index + 1):
+                doc_ids2return.append(ordered_list[i][1])
+        elif (operator == 'lt'):
+            for i in range(index - 1, start_index - 1, -1):
+                doc_ids2return.append(ordered_list[i][1])
+        elif (operator == 'lte'):
+            for i in range(index, start_index - 1, -1):
+                doc_ids2return.append(ordered_list[i][1])
+
+        print(doc_ids2return)
+
+    return doc_ids2return
