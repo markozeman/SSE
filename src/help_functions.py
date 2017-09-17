@@ -237,7 +237,7 @@ def path_strings(string):
         'firstName': 'personal//firstName//',
         'lastName': 'personal//lastName//',
 
-        'houseNumber': 'personal//address//houseNumber//',
+        'houseNum': 'personal//address//houseNumber//',
         'street': 'personal//address//street//',
         'country': 'personal//address//country//',
         'city': 'personal//address//city//',
@@ -268,7 +268,7 @@ def get_docs2return(encrypted_index, str_search_token, operator):
 
         indices.sort()
 
-        if (operator == 'lt' or operator == 'gte'):
+        if (operator == 'lt' or operator == 'gte' or operator == 'ne'):     # for 'ne' it doesn't matter
             index = indices[0]
         elif (operator == 'gt' or operator == 'lte'):
             index = indices[-1]
@@ -334,3 +334,16 @@ def is_date_format(string):
         except ValueError:
             return False
     return False
+
+
+def operator_string(operator):
+    op = {
+        '=': 'eq',
+        '≠': 'ne',
+        '<': 'lt',
+        '≤': 'lte',
+        '>': 'gt',
+        '≥': 'gte',
+    }
+    return op[operator]
+

@@ -1,11 +1,17 @@
+import re
+
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QButtonGroup, QSizePolicy, QLabel, QLineEdit
-from help_functions import matched_brackets, is_number, is_date_format
+from help_functions import *
+
+from OPE import OPE
 
 
 class SearhGUI(QWidget):
 
     def __init__(self):
         super().__init__()
+
+        self.ope = OPE()
 
         self.height = 480
         self.width = 720
@@ -16,6 +22,8 @@ class SearhGUI(QWidget):
         self.last_clicked_property = None
 
         self.init_UI()
+
+        self.search_clicked()
 
     def init_UI(self):
         ver_spacing = 100
@@ -212,10 +220,69 @@ class SearhGUI(QWidget):
 
         brackets_ok = matched_brackets(query)
         if (brackets_ok):
-            pass
+            self.ope.delete_user_directories()
+
+            query = '( birthDate = 1995-08-25 ) AND ( firstName ≠ Marko OR street ≠ Čopova ulica )'
+            split_txt = [x.strip() for x in re.split(r'[()]', query) if x.strip()]
+            print(split_txt)
+
+            q_2 = 'firstName ≠ ffdfdf AND temperature < 37'
+            split_2 = [x.strip() for x in re.split(r'[()]', q_2) if x.strip()]
+            print(split_2)
+
+            q_3 = '( birthDate = 1995-08-25 AND ( firstName = Marko OR firstName = Ana ) )'
+            split_3 = [x.strip() for x in re.split(r'[()]', q_3) if x.strip()]
+            print(split_3)
+
+
+            res = []
+
+            '''
+            for q in split_txt:
+                if (len(q) != 1):
+
+                    if ('AND' in q or 'OR' in q):
+                        conditions = [q[x:x+3] for x in range(0, len(q), 4)]
+                        operators = [q[x] for x in range(3, len(q), 4)]
+
+                        print(conditions)
+                        print(operators)
+
+                        operator_count = 0
+
+                        for con in conditions:
+                            property = con[0]
+                            operator = con[1]
+                            value = con[2]
+
+                            token = self.ope.generate_search_token(path_strings(property) + value)
+                            doc_ids = self.ope.search(token, operator_string(operator))
+                            res.append(doc_ids)
+
+                            res.append(operators[operator_count]) if operator_count < len(operators) else None
+                            operator_count += 1
+
+
+                    else:   # only one condition
+                        property = q[0]
+                        operator = q[1]
+                        value = q[2]
+
+                        token = self.ope.generate_search_token(path_strings(property) + value)
+                        doc_ids = self.ope.search(token, operator_string(operator))
+                        res.append(doc_ids)
+
+                        print(res)
+
+
+                elif (q[0] == 'AND' or q[0] == 'OR'):
+                    pass
+                else:
+                    print('Something went wrong!')
+            '''
+
         else:
             self.info_label.setText('Brackets are not set correctly.')
-
 
     def connect_button(self, btn):
         btn.clicked.connect(lambda: self.button_clicked(btn))
@@ -240,3 +307,11 @@ class SearhGUI(QWidget):
         elif (string in strings):
             return ['s', 'some string']
 
+
+
+
+if __name__ == '__main__':
+    app = QApplication([])
+    w = SearhGUI()
+    w.show()
+    app.exec_()

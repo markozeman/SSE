@@ -7,9 +7,7 @@ from PyQt5.QtWidgets import QApplication
 
 from help_functions import *
 
-# import SSE
 from SSE import SSE
-from GUI import SearhGUI
 
 
 class OPE:
@@ -235,10 +233,7 @@ if __name__ == '__main__':
     # ope.decrypt_documents()
 
 
-    app = QApplication([])
-    w = SearhGUI()
-    w.show()
-    app.exec_()
+
 
 
 
