@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QButtonGroup, QSizePolicy, QLabel, QLineEdit
-from help_functions import matched_brackets
+from help_functions import matched_brackets, is_number, is_date_format
 
 
 class SearhGUI(QWidget):
@@ -12,6 +12,8 @@ class SearhGUI(QWidget):
 
         self.setGeometry(700, 150, self.width, self.height)
         self.setWindowTitle('SSE')
+
+        self.last_clicked_property = None
 
         self.init_UI()
 
@@ -162,13 +164,16 @@ class SearhGUI(QWidget):
     def button_clicked(self, button):
         btn_txt = button.text()
         if (button in self.properties_buttons):
+            self.last_clicked_property = btn_txt
             self.buttons_state(self.properties_buttons, 'disable')
             self.buttons_state(self.brackets_buttons, 'disable')
             self.buttons_state(self.operators_buttons, 'enable')
         elif (button in self.operators_buttons):
             self.buttons_state(self.operators_buttons, 'disable')
-            self.ok_button.setEnabled(True)
             self.val_line_edit.setEnabled(True)
+            self.val_line_edit.clear()
+            self.val_line_edit.setPlaceholderText(self.type_of_var(self.last_clicked_property)[1])
+            self.ok_button.setEnabled(True)
         elif (btn_txt == 'AND' or btn_txt == 'OR'):
             self.buttons_state(self.and_or_buttons, 'disable')
             self.buttons_state(self.properties_buttons, 'enable')
@@ -184,6 +189,17 @@ class SearhGUI(QWidget):
 
     def ok_clicked(self):
         val = self.val_line_edit.text()
+
+        type_of_var = self.type_of_var(self.last_clicked_property)[0]
+        if (type_of_var == 'd'):
+            if (not is_date_format(val)):
+                self.info_label.setText('Value should be date.')
+                return
+        elif (type_of_var == 'n'):
+            if (not is_number(val)):
+                self.info_label.setText('Value should be number with dot separator.')
+                return
+
         self.query.setText(self.query.text() + val + ' ')
         self.val_line_edit.setDisabled(True)
         self.ok_button.setDisabled(True)
@@ -201,7 +217,6 @@ class SearhGUI(QWidget):
             self.info_label.setText('Brackets are not set correctly.')
 
 
-
     def connect_button(self, btn):
         btn.clicked.connect(lambda: self.button_clicked(btn))
 
@@ -213,4 +228,15 @@ class SearhGUI(QWidget):
             for btn in buttons:
                 btn.setDisabled(True)
 
+    def type_of_var(self, string):
+        dates = ['birthDate']
+        numbers = ['houseNum', 'postCode', 'temperature', 'heartRate', 'diastolic', 'systolic', 'spO2']
+        strings = ['firstName', 'lastName', 'street', 'country', 'city', 'type']
+
+        if (string in dates):
+            return ['d', 'YYYY-MM-DD']
+        elif (string in numbers):
+            return ['n', '36.2']
+        elif (string in strings):
+            return ['s', 'some string']
 

@@ -1,9 +1,11 @@
+import datetime
 import os
 import json
 import re
 import ast
 import math
 from collections import OrderedDict
+from dateutil.parser import parse
 
 
 
@@ -302,9 +304,9 @@ def get_docs2return(encrypted_index, str_search_token, operator):
     return doc_ids2return
 
 
-def matched_brackets(str):
+def matched_brackets(string):
     count = 0
-    for i in str:
+    for i in string:
         if i == "(":
             count += 1
         elif i == ")":
@@ -312,3 +314,23 @@ def matched_brackets(str):
         if count < 0:
             return False
     return count == 0
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_date_format(string):
+    date_reg_exp = re.compile('\d{4}[-]\d{2}[-]\d{2}')
+    match = re.match(date_reg_exp, string)
+    if (match is not None):
+        try:
+            parse(string)
+            return True
+        except ValueError:
+            return False
+    return False
