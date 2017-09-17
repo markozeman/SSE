@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QButtonGroup, QSizePolicy, QLabel, QLineEdit, \
-    QAbstractButton
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QButtonGroup, QSizePolicy, QLabel, QLineEdit
+from help_functions import matched_brackets
 
 
 class SearhGUI(QWidget):
@@ -25,6 +25,8 @@ class SearhGUI(QWidget):
         right_bracket = QPushButton(')', self)
         right_bracket.move(ver_spacing+hor_spacing, hor_spacing)
         self.connect_button(right_bracket)
+
+        self.brackets_buttons = [left_bracket, right_bracket]
 
         self.horizontal_line(3*hor_spacing)
 
@@ -72,6 +74,9 @@ class SearhGUI(QWidget):
         spO2.move(6*ver_spacing, 2*hor_spacing)
         self.connect_button(spO2)
 
+        self.properties_buttons = [birth_date, first_name, last_name, street, house_number, city, post_code,
+                                   country, type_of, temperature, heart_rate, diastolic, systolic, spO2]
+
         self.horizontal_line(8*hor_spacing)
 
         operators_widget = QWidget(self)
@@ -94,6 +99,9 @@ class SearhGUI(QWidget):
         gte.move(5*ver_spacing, 0)
         self.connect_button(gte)
 
+        self.operators_buttons = [eq, ne, lt, lte, gt, gte]
+        self.buttons_state(self.operators_buttons, 'disable')
+
         self.horizontal_line(11*hor_spacing)
 
         value_widget = QWidget(self)
@@ -103,9 +111,11 @@ class SearhGUI(QWidget):
         self.val_line_edit = QLineEdit(value_widget)
         self.val_line_edit.setFixedWidth(2 * ver_spacing)
         self.val_line_edit.move(ver_spacing-hor_spacing, 0)
-        ok_button = QPushButton('OK', value_widget)
-        ok_button.move(3*ver_spacing, 0)
-        ok_button.clicked.connect(self.ok_clicked)
+        self.val_line_edit.setDisabled(True)
+        self.ok_button = QPushButton('OK', value_widget)
+        self.ok_button.move(3*ver_spacing, 0)
+        self.ok_button.clicked.connect(self.ok_clicked)
+        self.ok_button.setDisabled(True)
 
         self.horizontal_line(14*hor_spacing)
 
@@ -116,6 +126,9 @@ class SearhGUI(QWidget):
         or_button = QPushButton('OR', and_or_widget)
         or_button.move(ver_spacing, 0)
         self.connect_button(or_button)
+
+        self.and_or_buttons = [and_button, or_button]
+        self.buttons_state(self.and_or_buttons, 'disable')
 
         self.horizontal_line(17*hor_spacing)
 
@@ -132,12 +145,13 @@ class SearhGUI(QWidget):
         commit_widget = QWidget(self)
         commit_widget.move(hor_spacing, 22*hor_spacing)
         search_button = QPushButton('Search!', commit_widget)
+        search_button.clicked.connect(self.search_clicked)
         clear_button = QPushButton('Clear', commit_widget)
         clear_button.move(ver_spacing, 0)
         clear_button.clicked.connect(self.clear_clicked)
-        info_label = QLabel('test', commit_widget)
-        info_label.move(2*ver_spacing, 4)
-        info_label.setFixedWidth(self.width-2*ver_spacing)
+        self.info_label = QLabel('', commit_widget)
+        self.info_label.move(2*ver_spacing, 4)
+        self.info_label.setFixedWidth(self.width-2*ver_spacing)
 
     def horizontal_line(self, y):
         horizontal_line = QWidget(self)
@@ -146,19 +160,57 @@ class SearhGUI(QWidget):
         horizontal_line.move(0, y)
 
     def button_clicked(self, button):
-        new_text = self.query.text() + button.text() + ' '
+        btn_txt = button.text()
+        if (button in self.properties_buttons):
+            self.buttons_state(self.properties_buttons, 'disable')
+            self.buttons_state(self.brackets_buttons, 'disable')
+            self.buttons_state(self.operators_buttons, 'enable')
+        elif (button in self.operators_buttons):
+            self.buttons_state(self.operators_buttons, 'disable')
+            self.ok_button.setEnabled(True)
+            self.val_line_edit.setEnabled(True)
+        elif (btn_txt == 'AND' or btn_txt == 'OR'):
+            self.buttons_state(self.and_or_buttons, 'disable')
+            self.buttons_state(self.properties_buttons, 'enable')
+
+        new_text = self.query.text() + btn_txt + ' '
         self.query.setText(new_text)
 
     def clear_clicked(self):
         self.query.clear()
+        self.info_label.clear()
+        self.buttons_state(self.and_or_buttons, 'disable')
+        self.buttons_state(self.properties_buttons, 'enable')
 
     def ok_clicked(self):
         val = self.val_line_edit.text()
         self.query.setText(self.query.text() + val + ' ')
+        self.val_line_edit.setDisabled(True)
+        self.ok_button.setDisabled(True)
+        self.buttons_state(self.and_or_buttons, 'enable')
+        self.buttons_state(self.brackets_buttons, 'enable')
+
+    def search_clicked(self):
+        query = self.query.text()
+        print(query)
+
+        brackets_ok = matched_brackets(query)
+        if (brackets_ok):
+            pass
+        else:
+            self.info_label.setText('Brackets are not set correctly.')
+
+
 
     def connect_button(self, btn):
         btn.clicked.connect(lambda: self.button_clicked(btn))
 
-
+    def buttons_state(self, buttons, state):
+        if (state == 'enable'):
+            for btn in buttons:
+                btn.setEnabled(True)
+        elif (state == 'disable'):
+            for btn in buttons:
+                btn.setDisabled(True)
 
 

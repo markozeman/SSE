@@ -300,3 +300,15 @@ def get_docs2return(encrypted_index, str_search_token, operator):
                 doc_ids2return.append(ordered_list[i][1])
 
     return doc_ids2return
+
+
+def matched_brackets(str):
+    count = 0
+    for i in str:
+        if i == "(":
+            count += 1
+        elif i == ")":
+            count -= 1
+        if count < 0:
+            return False
+    return count == 0
