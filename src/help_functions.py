@@ -1,4 +1,3 @@
-import datetime
 import os
 import json
 import re
@@ -6,7 +5,6 @@ import ast
 import math
 from collections import OrderedDict
 from dateutil.parser import parse
-
 
 
 def remove_double_backslashes(b):
@@ -38,26 +36,6 @@ def enc_read_file(filepath):
         content = f.read().split(' ')
         # content = [c.replace('\n', '\r') for c in content]
         return content
-
-
-def read_file_by_lines(filepath):
-    with open(filepath) as f:
-        return f.read().splitlines()
-
-
-def read_encrypted_file(filepath):
-    with open(filepath) as f:
-        content = f.readlines()
-
-        bytes_content = []
-        for i in range(len(content)):
-            if (i == len(content)-1):   # last line
-                b = string_2_bytes(content[i], 'latin-1')
-            else:
-                b = string_2_bytes(content[i][:-1], 'latin-1')
-            bytes_content.append(b)
-
-        return bytes_content
 
 
 def read_bin_file(filepath):
@@ -95,10 +73,6 @@ def bytes_2_string(B):
     return B.decode("latin-1")
 
 
-def bytes_2_utf8_string(B):
-    return B.decode("utf-8")
-
-
 def string_2_bytes(s, encoding):
     return bytes(s, encoding)
 
@@ -134,7 +108,6 @@ def read_ordered_json_file(filepath):
     except IOError:
         print('Cannot open file at: ', filepath)
         return False
-
 
 
 def repair_data(content):
@@ -187,20 +160,6 @@ def get_path(short_path):
 
 def get_longer_path(short_path):
     return os.path.join('..', get_path(short_path))
-
-
-def correct_lines(enc_list):
-    lines = enc_list.split('\n')
-    corrected_lines = []
-    for i in range(len(lines)):
-        if ('--' not in lines[i]):
-            corrected_lines = corrected_lines[:-1]
-            line = lines[i - 1] + '\n' + lines[i]
-            corrected_lines.append(line)
-        else:
-            corrected_lines.append(lines[i])
-
-    return corrected_lines
 
 
 def make_json_from_decrypted_file(ordered_dict):
@@ -347,3 +306,37 @@ def operator_string(operator):
     }
     return op[operator]
 
+
+def combine_sets(set_1, set_2, operator):
+    if (operator == 'OR'):
+        return set_1.union(set_2)
+    elif (operator == 'AND'):
+        return set_1.intersection(set_2)
+
+
+def solve_expression(exp):
+    ok = True
+    while (ok and len(exp) != 1):
+        # find ANDs
+        while ('AND' in exp):
+            and_index = exp.index('AND')
+            if (and_index-1 >= 0 and and_index+1 < len(exp)):
+                combination = combine_sets(exp[and_index - 1], exp[and_index + 1], 'AND')
+                del exp[and_index - 1:and_index + 2]
+                exp.insert(and_index - 1, combination)
+            else:
+                ok = False
+                break
+
+        # find ORs
+        while ('OR' in exp):
+            or_index = exp.index('OR')
+            if (or_index-1 >= 0 and or_index+1 < len(exp)):
+                combination = combine_sets(exp[or_index - 1], exp[or_index + 1], 'OR')
+                del exp[or_index - 1:or_index + 2]
+                exp.insert(or_index - 1, combination)
+            else:
+                ok = False
+                break
+
+    return exp

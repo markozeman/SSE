@@ -1,6 +1,4 @@
-import re
-
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QButtonGroup, QSizePolicy, QLabel, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QLineEdit
 from help_functions import *
 
 from OPE import OPE
@@ -22,8 +20,6 @@ class SearhGUI(QWidget):
         self.last_clicked_property = None
 
         self.init_UI()
-
-        self.search_clicked()
 
     def init_UI(self):
         ver_spacing = 100
@@ -192,7 +188,11 @@ class SearhGUI(QWidget):
     def clear_clicked(self):
         self.query.clear()
         self.info_label.clear()
+        self.val_line_edit.clear()
+        self.val_line_edit.setDisabled(True)
         self.buttons_state(self.and_or_buttons, 'disable')
+        self.buttons_state(self.operators_buttons, 'disable')
+        self.buttons_state(self.brackets_buttons, 'enable')
         self.buttons_state(self.properties_buttons, 'enable')
 
     def ok_clicked(self):
@@ -216,71 +216,71 @@ class SearhGUI(QWidget):
 
     def search_clicked(self):
         query = self.query.text()
-        print(query)
+        query_split = [x.strip() for x in re.split(r'[()]', query) if x.strip()]
+
+        if (len(query_split) == 0):
+            self.info_label.setText('Query cannot be empty.')
+            return
 
         brackets_ok = matched_brackets(query)
         if (brackets_ok):
-            self.ope.delete_user_directories()
-
-            query = '( birthDate = 1995-08-25 ) AND ( firstName ≠ Marko OR street ≠ Čopova ulica )'
-            split_txt = [x.strip() for x in re.split(r'[()]', query) if x.strip()]
-            print(split_txt)
-
-            q_2 = 'firstName ≠ ffdfdf AND temperature < 37'
-            split_2 = [x.strip() for x in re.split(r'[()]', q_2) if x.strip()]
-            print(split_2)
-
-            q_3 = '( birthDate = 1995-08-25 AND ( firstName = Marko OR firstName = Ana ) )'
-            split_3 = [x.strip() for x in re.split(r'[()]', q_3) if x.strip()]
-            print(split_3)
-
-
             res = []
+            for q in query_split:
+                parameters = q.split(' ')
 
-            '''
-            for q in split_txt:
-                if (len(q) != 1):
+                if (len(parameters) == 1 and (parameters[0] == 'AND' or parameters[0] == 'OR')):
+                    res.append(parameters[0])
+                elif ('AND' not in parameters and 'OR' not in parameters):    # only one condition
+                    property = parameters[0]
+                    operator = parameters[1]
+                    value = ' '.join(parameters[2:])
 
-                    if ('AND' in q or 'OR' in q):
-                        conditions = [q[x:x+3] for x in range(0, len(q), 4)]
-                        operators = [q[x] for x in range(3, len(q), 4)]
+                    token = self.ope.generate_search_token(path_strings(property) + value)
+                    doc_ids = self.ope.search(token, operator_string(operator))
+                    res.append(doc_ids)
+                else:
+                    and_operators = [i for i, j in enumerate(parameters) if j == 'AND']
+                    or_operators = [i for i, j in enumerate(parameters) if j == 'OR']
+                    and_or_operators = and_operators + or_operators
+                    and_or_operators.sort()
 
-                        print(conditions)
-                        print(operators)
-
-                        operator_count = 0
-
-                        for con in conditions:
-                            property = con[0]
-                            operator = con[1]
-                            value = con[2]
+                    i = 0
+                    part_res = []
+                    while (i < len(parameters)):
+                        if (i in and_or_operators):
+                            part_res.append(parameters[i])
+                        elif (i == 0 or i-1 in and_or_operators):   # property
+                            property = parameters[i]
+                        elif (i == 1 or i-2 in and_or_operators):   # operator
+                            operator = parameters[i]
+                        elif (i == 2 or i-3 in and_or_operators):   # start of value
+                            val = []
+                            while (i < len(parameters) and i not in and_or_operators):
+                                val.append(parameters[i])
+                                i += 1
+                            i -= 1
+                            value = ' '.join(val)
 
                             token = self.ope.generate_search_token(path_strings(property) + value)
                             doc_ids = self.ope.search(token, operator_string(operator))
-                            res.append(doc_ids)
+                            part_res.append(doc_ids)
+                        i += 1
 
-                            res.append(operators[operator_count]) if operator_count < len(operators) else None
-                            operator_count += 1
+                    # solve part_res in save into res
+                    part_res = solve_expression(part_res)
+                    res += part_res
 
+            # solve res
+            res = solve_expression(res)
 
-                    else:   # only one condition
-                        property = q[0]
-                        operator = q[1]
-                        value = q[2]
-
-                        token = self.ope.generate_search_token(path_strings(property) + value)
-                        doc_ids = self.ope.search(token, operator_string(operator))
-                        res.append(doc_ids)
-
-                        print(res)
-
-
-                elif (q[0] == 'AND' or q[0] == 'OR'):
-                    pass
-                else:
-                    print('Something went wrong!')
-            '''
-
+            # clear directory, copy encrypted files and decrypt them
+            self.ope.delete_user_directories()
+            if (len(res) == 1):
+                num_of_files = self.ope.copy_encrypted_files_to_user(res[0])
+                self.info_label.setText('Documents matching query: ' + str(num_of_files))
+                self.ope.decrypt_documents()
+            else:
+                print('res does not have one element.')
         else:
             self.info_label.setText('Brackets are not set correctly.')
 

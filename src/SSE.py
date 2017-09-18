@@ -3,7 +3,6 @@ from Crypto.Cipher import AES
 from shutil import copy
 
 from help_functions import *
-# from OPE import OPE
 
 
 class SSE:

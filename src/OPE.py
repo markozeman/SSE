@@ -1,9 +1,4 @@
-from Crypto.Cipher import AES
-from collections import OrderedDict
-
 from shutil import copy
-
-from PyQt5.QtWidgets import QApplication
 
 from help_functions import *
 
@@ -161,6 +156,8 @@ class OPE:
             # copy encrypted file to user
             copy(filepath, get_longer_path('user_enc'))
 
+        return len(doc_ids2return)
+
 
     def decrypt_documents(self):
         doc_index = read_json_file(get_longer_path('doc_index'))
@@ -217,14 +214,14 @@ if __name__ == '__main__':
     # token = ope.generate_search_token(path_strings('heartRate') + '50')
     # doc_ids_1 = ope.search(token, 'gt')
     # print(doc_ids_1)
-    #
+
     # token = ope.generate_search_token(path_strings('spO2') + '99')
     # doc_ids_2 = ope.search(token, 'eq')
     # print(doc_ids_2)
     #
     # intersection = doc_ids_1.intersection(doc_ids_2)
     # print('intersection', intersection)
-    #
+
     # union = doc_ids_1.union(doc_ids_2)
     # print('union', union)
 
