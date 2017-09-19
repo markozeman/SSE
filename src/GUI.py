@@ -4,7 +4,7 @@ from help_functions import *
 from OPE import OPE
 
 
-class SearhGUI(QWidget):
+class SearchGUI(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -218,12 +218,12 @@ class SearhGUI(QWidget):
         query = self.query.text()
         query_split = [x.strip() for x in re.split(r'[()]', query) if x.strip()]
 
-        if (len(query_split) == 0):
-            self.info_label.setText('Query cannot be empty.')
-            return
-
         brackets_ok = matched_brackets(query)
         if (brackets_ok):
+            if (len(query_split) == 0):
+                self.info_label.setText('Query cannot be empty.')
+                return
+
             res = []
             for q in query_split:
                 parameters = q.split(' ')
@@ -312,6 +312,6 @@ class SearhGUI(QWidget):
 
 if __name__ == '__main__':
     app = QApplication([])
-    w = SearhGUI()
+    w = SearchGUI()
     w.show()
     app.exec_()
