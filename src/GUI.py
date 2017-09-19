@@ -1,3 +1,5 @@
+import time
+
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QLineEdit
 from help_functions import *
 
@@ -215,6 +217,8 @@ class SearchGUI(QWidget):
         self.buttons_state(self.brackets_buttons, 'enable')
 
     def search_clicked(self):
+        start_time = time.time()
+
         query = self.query.text()
         query_split = [x.strip() for x in re.split(r'[()]', query) if x.strip()]
 
@@ -276,9 +280,13 @@ class SearchGUI(QWidget):
             # clear directory, copy encrypted files and decrypt them
             self.ope.delete_user_directories()
             if (len(res) == 1):
-                num_of_files = self.ope.copy_encrypted_files_to_user(res[0])
-                self.info_label.setText('Documents matching query: ' + str(num_of_files))
+
                 self.ope.decrypt_documents()
+                end_time = time.time()
+                num_of_files = self.ope.copy_encrypted_files_to_user(res[0])
+                self.info_label.setText('Documents matching query: ' + str(num_of_files) +
+                                        '.  Query took ' + "{0:.1f}".format(1000*(end_time - start_time)) + ' miliseconds.')
+
             else:
                 print('res does not have one element.')
         else:
