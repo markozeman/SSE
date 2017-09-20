@@ -120,6 +120,7 @@ class SearchGUI(QWidget):
         self.val_line_edit.setFixedWidth(2 * ver_spacing)
         self.val_line_edit.move(ver_spacing-hor_spacing, 0)
         self.val_line_edit.setDisabled(True)
+        self.val_line_edit.returnPressed.connect(self.ok_clicked)
         self.ok_button = QPushButton('OK', value_widget)
         self.ok_button.move(3*ver_spacing, 0)
         self.ok_button.clicked.connect(self.ok_clicked)
@@ -235,6 +236,10 @@ class SearchGUI(QWidget):
                 if (len(parameters) == 1 and (parameters[0] == 'AND' or parameters[0] == 'OR')):
                     res.append(parameters[0])
                 elif ('AND' not in parameters and 'OR' not in parameters):    # only one condition
+                    if (len(parameters) != 3):
+                        self.info_label.setText('Query is not correct.')
+                        return
+
                     property = parameters[0]
                     path_string = path_strings(property)
                     operator = parameters[1]
@@ -290,7 +295,7 @@ class SearchGUI(QWidget):
                 self.ope.decrypt_documents()
                 end_time = time.time()
                 self.info_label.setText('Documents matching query: ' + str(num_of_files) + '.' + 5*' ' +
-                                        'Query took ' + "{0:.1f}".format(1000*(end_time - start_time)) + ' milliseconds.')
+                                        'Query took ' + "{0:.1f}".format(1000*(end_time - start_time)) + ' ms.')
 
             else:
                 print('res does not have one element.')

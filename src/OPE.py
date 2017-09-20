@@ -27,6 +27,8 @@ class OPE:
 
         inverted_index = {word: [txt for txt, words in keyword_index.items() if word in words] for word in all_words}
 
+        # TODO
+        # sort according to data type
         ordered_inverted_index = OrderedDict(sorted(inverted_index.items(), key=lambda x: x[0]))
 
         write_obj_to_json_file(ordered_inverted_index, get_longer_path('inverted_index'))
