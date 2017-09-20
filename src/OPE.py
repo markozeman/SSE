@@ -17,25 +17,37 @@ class OPE:
         files = os.listdir(get_longer_path('data'))
         for file in files:
             json = read_json_file(get_longer_path('data') + file)
-            # print(file, content)
 
             content = self.recursive_json(json, [], [])
-            # print(content)
 
             keyword_index[index_json[file]] = content
             all_words += content
 
         all_words = list(set(all_words))  # make words list unique
-        # print(keyword_index)
-        # print(all_words)
 
         inverted_index = {word: [txt for txt, words in keyword_index.items() if word in words] for word in all_words}
-        # print(inverted_index)
 
         ordered_inverted_index = OrderedDict(sorted(inverted_index.items(), key=lambda x: x[0]))
-        # print(ordered_inverted_index)
 
         write_obj_to_json_file(ordered_inverted_index, get_longer_path('inverted_index'))
+
+
+    def create_index_of_values(self):
+        inverted_index = read_ordered_json_file(get_longer_path('inverted_index'))
+
+        index_of_values = {}
+        for key, val in inverted_index.items():
+            split_key = key.split('//')
+            property_path = '//'.join(split_key[:-1]) + '//'
+            value = split_key[-1]
+            num_of_values = len(val)
+
+            if (property_path in index_of_values):
+                index_of_values[property_path].append([value, num_of_values])
+            else:
+                index_of_values[property_path] = [[value, num_of_values]]
+
+        write_obj_to_json_file(index_of_values, get_longer_path('values_index'))
 
 
     def recursive_json(self, json, path, file_content):
@@ -133,14 +145,12 @@ class OPE:
         return search_token
 
 
-    def search(self, search_token, operator):
+    def search(self, search_token, operator, position):
         # possible operators: 'eq', 'ne', 'gt', 'gte', 'lt', 'lte'
         encrypted_index = read_ordered_json_file(get_longer_path('encrypted_index'))
         str_search_token = [bytes_2_string(token) for token in search_token]
 
-        doc_ids2return = get_docs2return(encrypted_index, str_search_token, operator)
-
-        # self.copy_encrypted_files_to_user(doc_ids2return)
+        doc_ids2return = get_docs2return(encrypted_index, str_search_token, operator, position)
 
         return set(doc_ids2return)
 
@@ -206,6 +216,7 @@ if __name__ == '__main__':
     ope = OPE()
 
     # ope.create_inverted_keyword_index()
+    # ope.create_index_of_values()
     # ope.encrypt_index()
     # ope.encrypt_documents()
 
@@ -228,9 +239,6 @@ if __name__ == '__main__':
 
     # ope.copy_encrypted_files_to_user(union)
     # ope.decrypt_documents()
-
-
-
 
 
 

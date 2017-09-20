@@ -140,6 +140,7 @@ def get_path(short_path):
         'doc_index_switched': os.path.join('..', 'Server', 'document_index_switched.json'),
 
         'inverted_index': os.path.join('..', 'Private', 'inverted_index.json'),
+        'values_index': os.path.join('..', 'Private', 'values_index.json'),
 
         'index_key': os.path.join('..', 'Private', 'keys', 'index_key'),
         'index_key_txt': os.path.join('..', 'Private', 'keys', 'index_key.txt'),
@@ -213,13 +214,12 @@ def path_strings(string):
     return paths[string]
 
 
-def get_docs2return(encrypted_index, str_search_token, operator):
+def get_docs2return(encrypted_index, str_search_token, operator, position):
     if (operator == 'eq'):
         doc_ids2return = [encrypted_index[token] for token in str_search_token if token in encrypted_index]
     else:
         num_of_files = encrypted_index['number_of_files']
         indices = []
-        doc_ids2return = []
         for token in str_search_token:
             if (token in encrypted_index):
                 index = list(encrypted_index.keys()).index(token)
@@ -241,24 +241,47 @@ def get_docs2return(encrypted_index, str_search_token, operator):
 
         ordered_list = list(encrypted_index.items())
 
-        if (operator == 'ne'):
-            from_start_to_end = set([i for i in range(start_index, end_index + 1)])
-            indices_set = set(indices)
-            not_equals = from_start_to_end - indices_set
-            for ind in not_equals:
-                doc_ids2return.append(ordered_list[ind][1])
-        elif (operator == 'gt'):
-            for i in range(index + 1, end_index + 1):
-                doc_ids2return.append(ordered_list[i][1])
-        elif (operator == 'gte'):
-            for i in range(index, end_index + 1):
-                doc_ids2return.append(ordered_list[i][1])
-        elif (operator == 'lt'):
-            for i in range(index - 1, start_index - 1, -1):
-                doc_ids2return.append(ordered_list[i][1])
-        elif (operator == 'lte'):
-            for i in range(index, start_index - 1, -1):
-                doc_ids2return.append(ordered_list[i][1])
+        doc_ids2return = []
+        if (position == 'exact'):
+            if (operator == 'ne'):
+                from_start_to_end = set([i for i in range(start_index, end_index + 1)])
+                indices_set = set(indices)
+                not_equals = from_start_to_end - indices_set
+                for ind in not_equals:
+                    doc_ids2return.append(ordered_list[ind][1])
+            elif (operator == 'gt'):
+                for i in range(index + 1, end_index + 1):
+                    doc_ids2return.append(ordered_list[i][1])
+            elif (operator == 'gte'):
+                for i in range(index, end_index + 1):
+                    doc_ids2return.append(ordered_list[i][1])
+            elif (operator == 'lt'):
+                for i in range(index - 1, start_index - 1, -1):
+                    doc_ids2return.append(ordered_list[i][1])
+            elif (operator == 'lte'):
+                for i in range(index, start_index - 1, -1):
+                    doc_ids2return.append(ordered_list[i][1])
+        elif (position == 'left'):
+            if (operator == 'ne'):
+                from_start_to_end = set([i for i in range(start_index, end_index + 1)])
+                for ind in from_start_to_end:
+                    doc_ids2return.append(ordered_list[ind][1])
+            elif (operator == 'gt' or operator == 'gte'):
+                for i in range(index, end_index + 1):
+                    doc_ids2return.append(ordered_list[i][1])
+            elif (operator == 'lt' or operator == 'lte'):
+                for i in range(index - 1, start_index - 1, -1):
+                    doc_ids2return.append(ordered_list[i][1])
+        elif (position == 'right'):
+            if (operator == 'ne'):
+                from_start_to_end = set([i for i in range(start_index, end_index + 1)])
+                for ind in from_start_to_end:
+                    doc_ids2return.append(ordered_list[ind][1])
+            elif (operator == 'gt' or operator == 'gte'):
+                doc_ids2return = []
+            elif (operator == 'lt' or operator == 'lte'):
+                for i in range(index, start_index - 1, -1):
+                    doc_ids2return.append(ordered_list[i][1])
 
     return doc_ids2return
 
@@ -340,3 +363,28 @@ def solve_expression(exp):
                 break
 
     return exp
+
+
+def find_closest_value(path_string, operator, value):
+    # 'left', 'right' or 'exact' tells position of chosen value to curr_val
+    pos = None
+    if (operator != '='):
+        values_index = read_json_file(get_longer_path('values_index'))
+        all_values = values_index[path_string]
+        print(all_values)
+
+        for v in all_values:
+            curr_val = v[0]
+            if (value == curr_val):
+                pos = 'exact'
+                break
+            if (value < curr_val):
+                pos = 'left'
+                break
+        else:  # selected value is bigger than all_values
+            pos = 'right'
+            curr_val = all_values[-1][0]
+    else:
+        curr_val = value
+
+    return [curr_val, pos]

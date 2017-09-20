@@ -236,11 +236,14 @@ class SearchGUI(QWidget):
                     res.append(parameters[0])
                 elif ('AND' not in parameters and 'OR' not in parameters):    # only one condition
                     property = parameters[0]
+                    path_string = path_strings(property)
                     operator = parameters[1]
                     value = ' '.join(parameters[2:])
 
-                    token = self.ope.generate_search_token(path_strings(property) + value)
-                    doc_ids = self.ope.search(token, operator_string(operator))
+                    curr_value, position = find_closest_value(path_string, operator, value)
+
+                    token = self.ope.generate_search_token(path_string + curr_value)
+                    doc_ids = self.ope.search(token, operator_string(operator), position)
                     res.append(doc_ids)
                 else:
                     and_operators = [i for i, j in enumerate(parameters) if j == 'AND']
@@ -255,6 +258,7 @@ class SearchGUI(QWidget):
                             part_res.append(parameters[i])
                         elif (i == 0 or i-1 in and_or_operators):   # property
                             property = parameters[i]
+                            path_string = path_strings(property)
                         elif (i == 1 or i-2 in and_or_operators):   # operator
                             operator = parameters[i]
                         elif (i == 2 or i-3 in and_or_operators):   # start of value
@@ -265,8 +269,10 @@ class SearchGUI(QWidget):
                             i -= 1
                             value = ' '.join(val)
 
-                            token = self.ope.generate_search_token(path_strings(property) + value)
-                            doc_ids = self.ope.search(token, operator_string(operator))
+                            curr_value, position = find_closest_value(path_string, operator, value)
+
+                            token = self.ope.generate_search_token(path_string + curr_value)
+                            doc_ids = self.ope.search(token, operator_string(operator), position)
                             part_res.append(doc_ids)
                         i += 1
 
@@ -280,12 +286,11 @@ class SearchGUI(QWidget):
             # clear directory, copy encrypted files and decrypt them
             self.ope.delete_user_directories()
             if (len(res) == 1):
-
+                num_of_files = self.ope.copy_encrypted_files_to_user(res[0])
                 self.ope.decrypt_documents()
                 end_time = time.time()
-                num_of_files = self.ope.copy_encrypted_files_to_user(res[0])
-                self.info_label.setText('Documents matching query: ' + str(num_of_files) +
-                                        '.  Query took ' + "{0:.1f}".format(1000*(end_time - start_time)) + ' miliseconds.')
+                self.info_label.setText('Documents matching query: ' + str(num_of_files) + '.' + 5*' ' +
+                                        'Query took ' + "{0:.1f}".format(1000*(end_time - start_time)) + ' milliseconds.')
 
             else:
                 print('res does not have one element.')
