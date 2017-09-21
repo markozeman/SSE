@@ -1,5 +1,5 @@
 
-from help_functions import write_obj_to_json_file, get_path
+from help_functions import write_obj_to_json_file, get_longer_path
 
 
 patient_1 = {
@@ -81,7 +81,7 @@ patient_3 = {
 
 
 if __name__ == '__main__':
-    path = '../' + get_path('data')
+    path = get_longer_path('data')
 
     write_obj_to_json_file(patient_1, path + 'MarkoZeman.json')
     write_obj_to_json_file(patient_2, path + 'JanezNovak.json')
