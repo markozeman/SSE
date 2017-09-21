@@ -373,7 +373,7 @@ def find_closest_value(path_string, operator, value, value_type):
         values_index = read_json_file(get_longer_path('values_index'))
         all_values = values_index[path_string]
         all_values_1d = [float(v[0]) if is_number(v[0]) else v[0] for v in all_values]
-        value = float(value) if is_number(value) else value
+        value = float(value) if is_number(value) and value_type != 'string' else value
 
         index = bisect.bisect_left(all_values_1d, value)
         if (index == len(all_values_1d)):
@@ -435,3 +435,16 @@ def property_type(property):
         'spO2': 'int',
     }
     return t[property]
+
+
+def type_of_var(string):
+    dates = ['birthDate']
+    numbers = ['houseNum', 'postCode', 'temperature', 'heartRate', 'diastolic', 'systolic', 'spO2']
+    strings = ['firstName', 'lastName', 'street', 'country', 'city', 'type']
+
+    if (string in dates):
+        return ['d', 'YYYY-MM-DD']
+    elif (string in numbers):
+        return ['n', '36.2']
+    elif (string in strings):
+        return ['s', 'some string']

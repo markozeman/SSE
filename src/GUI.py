@@ -179,12 +179,13 @@ class SearchGUI(QWidget):
             self.buttons_state(self.operators_buttons, 'disable')
             self.val_line_edit.setEnabled(True)
             self.val_line_edit.clear()
-            self.val_line_edit.setPlaceholderText(self.type_of_var(self.last_clicked_property)[1])
+            self.val_line_edit.setPlaceholderText(type_of_var(self.last_clicked_property)[1])
             self.val_line_edit.setFocus(True)
             self.ok_button.setEnabled(True)
         elif (btn_txt == 'AND' or btn_txt == 'OR'):
             self.buttons_state(self.and_or_buttons, 'disable')
             self.buttons_state(self.properties_buttons, 'enable')
+            self.info_label.clear()
 
         new_text = self.query.text() + btn_txt + ' '
         self.query.setText(new_text)
@@ -202,12 +203,12 @@ class SearchGUI(QWidget):
     def ok_clicked(self):
         val = self.val_line_edit.text()
 
-        type_of_var = self.type_of_var(self.last_clicked_property)[0]
-        if (type_of_var == 'd'):
+        type_of_variable = type_of_var(self.last_clicked_property)[0]
+        if (type_of_variable == 'd'):
             if (not is_date_format(val)):
                 self.info_label.setText('Value should be date.')
                 return
-        elif (type_of_var == 'n'):
+        elif (type_of_variable == 'n'):
             if (not is_number(val)):
                 self.info_label.setText('Value should be number with dot separator.')
                 return
@@ -237,7 +238,7 @@ class SearchGUI(QWidget):
                 if (len(parameters) == 1 and (parameters[0] == 'AND' or parameters[0] == 'OR')):
                     res.append(parameters[0])
                 elif ('AND' not in parameters and 'OR' not in parameters):    # only one condition
-                    if (len(parameters) != 3):
+                    if (len(parameters) < 3):
                         self.info_label.setText('Query is not correct.')
                         return
 
@@ -295,7 +296,7 @@ class SearchGUI(QWidget):
                 num_of_files = self.ope.copy_encrypted_files_to_user(res[0])
                 self.ope.decrypt_documents()
                 end_time = time.time()
-                self.info_label.setText('Documents matching query: ' + str(num_of_files) + '.' + 5*' ' +
+                self.info_label.setText('Documents matching query: ' + str(num_of_files) + '.' + 4*' ' +
                                         'Query took ' + "{0:.1f}".format(1000*(end_time - start_time)) + ' ms.')
 
             else:
@@ -313,18 +314,6 @@ class SearchGUI(QWidget):
         elif (state == 'disable'):
             for btn in buttons:
                 btn.setDisabled(True)
-
-    def type_of_var(self, string):
-        dates = ['birthDate']
-        numbers = ['houseNum', 'postCode', 'temperature', 'heartRate', 'diastolic', 'systolic', 'spO2']
-        strings = ['firstName', 'lastName', 'street', 'country', 'city', 'type']
-
-        if (string in dates):
-            return ['d', 'YYYY-MM-DD']
-        elif (string in numbers):
-            return ['n', '36.2']
-        elif (string in strings):
-            return ['s', 'some string']
 
 
 
