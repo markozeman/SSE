@@ -3,6 +3,7 @@ import json
 import re
 import ast
 import math
+import bisect
 from collections import OrderedDict
 from dateutil.parser import parse
 
@@ -365,26 +366,72 @@ def solve_expression(exp):
     return exp
 
 
-def find_closest_value(path_string, operator, value):
+def find_closest_value(path_string, operator, value, value_type):
     # 'left', 'right' or 'exact' tells position of chosen value to curr_val
     pos = None
     if (operator != '='):
         values_index = read_json_file(get_longer_path('values_index'))
         all_values = values_index[path_string]
-        print(all_values)
+        all_values_1d = [float(v[0]) if is_number(v[0]) else v[0] for v in all_values]
+        value = float(value) if is_number(value) else value
 
-        for v in all_values:
-            curr_val = v[0]
-            if (value == curr_val):
-                pos = 'exact'
-                break
-            if (value < curr_val):
-                pos = 'left'
-                break
-        else:  # selected value is bigger than all_values
+        index = bisect.bisect_left(all_values_1d, value)
+        if (index == len(all_values_1d)):
+            curr_val = all_values_1d[-1]
             pos = 'right'
-            curr_val = all_values[-1][0]
+        elif (all_values_1d[index] == value):
+            curr_val = value
+            pos = 'exact'
+        else:
+            curr_val = all_values_1d[index]
+            pos = 'left'
     else:
         curr_val = value
 
-    return [curr_val, pos]
+    if (value_type == 'int'):
+        curr_val = int(curr_val)
+
+    return [str(curr_val), pos]
+
+
+def sort_values(a, b):
+    a_path = a[0].split('//')[:-1]
+    a_val = a[0].split('//')[-1]
+    b_path = b[0].split('//')[:-1]
+    b_val = b[0].split('//')[-1]
+
+    if (a_path == b_path):
+        if (is_number(a_val) and is_number(b_val)):
+            return float(a_val) - float(b_val)
+        else:
+            if (a_val < b_val):
+                return -1
+            else:
+                return 1
+    elif (a_path < b_path):
+        return -1
+    else:
+        return 1
+
+
+def property_type(property):
+    t = {
+        'birthDate': 'date',
+        'firstName': 'string',
+        'lastName': 'string',
+
+        'houseNum': 'int',
+        'street': 'string',
+        'country': 'string',
+        'city': 'string',
+        'postCode': 'int',
+
+        'type': 'string',
+
+        'temperature': 'float',
+        'heartRate': 'int',
+        'diastolic': 'int',
+        'systolic': 'int',
+        'spO2': 'int',
+    }
+    return t[property]

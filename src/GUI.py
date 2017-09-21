@@ -180,6 +180,7 @@ class SearchGUI(QWidget):
             self.val_line_edit.setEnabled(True)
             self.val_line_edit.clear()
             self.val_line_edit.setPlaceholderText(self.type_of_var(self.last_clicked_property)[1])
+            self.val_line_edit.setFocus(True)
             self.ok_button.setEnabled(True)
         elif (btn_txt == 'AND' or btn_txt == 'OR'):
             self.buttons_state(self.and_or_buttons, 'disable')
@@ -245,7 +246,7 @@ class SearchGUI(QWidget):
                     operator = parameters[1]
                     value = ' '.join(parameters[2:])
 
-                    curr_value, position = find_closest_value(path_string, operator, value)
+                    curr_value, position = find_closest_value(path_string, operator, value, property_type(property))
 
                     token = self.ope.generate_search_token(path_string + curr_value)
                     doc_ids = self.ope.search(token, operator_string(operator), position)
@@ -274,7 +275,7 @@ class SearchGUI(QWidget):
                             i -= 1
                             value = ' '.join(val)
 
-                            curr_value, position = find_closest_value(path_string, operator, value)
+                            curr_value, position = find_closest_value(path_string, operator, value, property_type(property))
 
                             token = self.ope.generate_search_token(path_string + curr_value)
                             doc_ids = self.ope.search(token, operator_string(operator), position)
