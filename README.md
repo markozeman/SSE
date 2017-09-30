@@ -39,22 +39,68 @@ Opiši direktorijsko strukturo. Testiraj v drugi mapi od začetka.
 
 2. Inside this directory create five more folders and name them _Data_, _Private_, _Server_, _SSE_, _User_.
 
-3. Inside _SSE_ directory copy all files downloaded from github link <https://github.com/markozeman/SSE.git>.
+3. Inside _Private_ directory create empty folders named _keys_ and _IVs_.
 
-Your directory structure should look like this:
+4. Inside _Private_ directory create json file _document\_index.json_ with empty brackets {}.
+
+5. Inside _Private/IVs_ directory create json file _ivs.json_ with empty brackets {}.
+
+6. Inside _SSE_ directory copy all files downloaded from github link <https://github.com/markozeman/SSE.git>.
+
+Your directory structure should look something like this:  
 ![alt folder_structure](images/folder_structure.png "directory structure")
 
-4. Inside _SSE/src_ directory execute _create\_patient\_json.py_ file.
+7. Inside _SSE/src_ directory execute _create\_patient\_json.py_ file.
 
-After that your directory structure should look like this:
+8. In terminal move to _SSE/src_ directory, start _ipython_ and execute this commands:
+```python
+from SSE import SSE
+sse = SSE()
+
+sse.generate_and_save_keys()
+sse.update_IVs_and_doc_index()
+```
+
+After that your directory structure should look something like this:  
 ![alt folder_structure_2](images/folder_structure_2.png "directory structure")
 
+9. In terminal move to _SSE/src_ directory, start _ipython_ and execute this commands:
+```python
+from SSE import SSE
+from OPE import OPE
+sse = SSE()
+ope = OPE()
+
+sse.create_switched_document_index()
+ope.create_inverted_keyword_index()
+```
+
+After that your directory structure should look something like this:  
+![alt folder_structure_3](images/folder_structure_3.png "directory structure")
+
+Inverted index should look like this:  
+![alt inverted_index](images/inverted_index.png "inverted index")
+
+10. In terminal move to _SSE/src_ directory, start _ipython_ and execute this commands:
+```python
+from OPE import OPE
+ope = OPE()
+
+ope.create_index_of_values()
+ope.encrypt_index()
+ope.encrypt_documents()
+```
+
+After that your directory structure should look something like this:    
+![alt folder_structure_4](images/folder_structure_4.png "directory structure")
+
+Encrypted file of Janez Novak should look like this:  
+![alt encrypted_file](images/encrypted_file.png "Janez Novak data encrypted")
+
+11. Now we have everything prepared to use graphical interface to search over data.
 
 
-
-
-### _Usage example_
-Primeri klicev iz konzole. Slike, kako po vsakem klicu izgleda stanje.  
+### _GUI usage example_ 
 GUI - razloži, kako se zažene in uporablja.
 
 
@@ -62,7 +108,7 @@ GUI - razloži, kako se zažene in uporablja.
 
 * * * 
 
-In our solution we used Python 3.5.2.
+In our solution we used Python 3.5.2 and Anaconda 3.
 
 
 
