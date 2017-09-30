@@ -35,7 +35,49 @@ Search steps over encrypted data:
 ### _Instructions for establishing working directory_
 Opiši direktorijsko strukturo. Testiraj v drugi mapi od začetka.
 
+1. Create empty folder and name it _TestSSE_.
 
-### _Example_
+2. Inside this directory create five more folders and name them _Data_, _Private_, _Server_, _SSE_, _User_.
+
+3. Inside _SSE_ directory copy all files downloaded from github link <https://github.com/markozeman/SSE.git>.
+
+Your directory structure should look like this:
+![alt folder_structure](images/folder_structure.png "directory structure")
+
+4. Inside _SSE/src_ directory execute _create\_patient\_json.py_ file.
+
+After that your directory structure should look like this:
+![alt folder_structure_2](images/folder_structure_2.png "directory structure")
+
+
+
+
+
+### _Usage example_
 Primeri klicev iz konzole. Slike, kako po vsakem klicu izgleda stanje.  
 GUI - razloži, kako se zažene in uporablja.
+
+
+
+
+* * * 
+
+In our solution we used Python 3.5.2.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
