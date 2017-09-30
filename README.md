@@ -11,9 +11,9 @@ Search steps over encrypted data:
 1. Create three example json data files. You can create examples if you execute python file _create\_patient\_json.py_. One of examples is shown in the picture.  
 ![alt json_file](images/json_file.png "JSON file")
 
-2. Create index and document key and save them: _SSE_ class method _generate\_and\_save\_keys_.
+2. Create 32B index and document key and save them: _SSE_ class method _generate\_and\_save\_keys_.
 
-3. Generate IVs and update document index - _SSE_ class method _update\_IVs\_and\_doc\_index_.
+3. Generate 16B IVs and update document index - _SSE_ class method _update\_IVs\_and\_doc\_index_.
 
 4. Create switched document index for server - _SSE_ class method _create\_switched\_document\_index_.
 
@@ -33,9 +33,8 @@ Search steps over encrypted data:
 
 
 ### _Instructions for establishing working directory_
-Opiši direktorijsko strukturo. Testiraj v drugi mapi od začetka.
 
-1. Create empty folder and name it _TestSSE_.
+1. Create empty folder and name it for example _TestSSE_.
 
 2. Inside this directory create five more folders and name them _Data_, _Private_, _Server_, _SSE_, _User_.
 
@@ -91,6 +90,8 @@ ope.encrypt_index()
 ope.encrypt_documents()
 ```
 
+11. Inside _User_ directory make two empty directories named _encrypted_ and _decrypted_.
+
 After that your directory structure should look something like this:    
 ![alt folder_structure_4](images/folder_structure_4.png "directory structure")
 
@@ -103,27 +104,15 @@ Encrypted file of Janez Novak should look like this:
 ### _GUI usage example_ 
 GUI - razloži, kako se zažene in uporablja.
 
+Graphical interface gives you opportunity to search over encrypted data with simple clicking.
+After you click _Search!_ button, query is parsed and execute search over encrypted data.
+Files that match query are copied to _User/encrypted_ folder and then decrypted to _User/decrypted_ folder.
 
+We start GUI by executing _GUI.py_ file in _SSE/src_ directory.  
+![alt gui](images/gui.png "SSE graphical interface")
 
 
 * * * 
-
 In our solution we used Python 3.5.2 and Anaconda 3.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
