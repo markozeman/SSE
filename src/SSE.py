@@ -17,18 +17,18 @@ class SSE:
 
         # write keys to binary files
         keys = [self.index_key, self.document_key]
-        paths = [get_path('index_key'), get_path('document_key')]
+        paths = [get_longer_path('index_key'), get_longer_path('document_key')]
         write_keys_to_file(keys, paths, bin=True)
 
         # write keys to text files
         keys = [bytes_2_string(self.index_key), bytes_2_string(self.document_key)]
-        paths = [get_path('index_key_txt'), get_path('document_key_txt')]
+        paths = [get_longer_path('index_key_txt'), get_longer_path('document_key_txt')]
         write_keys_to_file(keys, paths)
 
     def update_IVs_and_doc_index(self):
-        obj, changed_ids = self.make_document_index(get_path('data'))
+        obj, changed_ids = self.make_document_index(get_longer_path('data'))
 
-        curr_ivs = read_json_file(get_path('ivs'))
+        curr_ivs = read_json_file(get_longer_path('ivs'))
 
         # -1 because of 'current_value' key
         if (len(obj)-1 == len(curr_ivs)):
@@ -44,12 +44,12 @@ class SSE:
             for ch_id in changed_ids:
                 curr_ivs.pop(str(ch_id), None)
 
-        write_obj_to_json_file(curr_ivs, get_path('ivs'))
+        write_obj_to_json_file(curr_ivs, get_longer_path('ivs'))
 
     def make_document_index(self, path):
         files = os.listdir(path)
 
-        curr_json = read_json_file(get_path('doc_index'))
+        curr_json = read_json_file(get_longer_path('doc_index'))
 
         # -1 because of 'current_value' key
         if (len(files) == len(curr_json) - 1):
@@ -77,7 +77,7 @@ class SSE:
                 curr_json.pop(del_key, None)
 
         # save updated version
-        write_obj_to_json_file(curr_json, get_path('doc_index'))
+        write_obj_to_json_file(curr_json, get_longer_path('doc_index'))
 
         # update switched document index
         self.create_switched_document_index()
@@ -110,13 +110,13 @@ class SSE:
         return plaintext
 
     def create_switched_document_index(self):
-        curr_json = read_json_file(get_path('doc_index'))
+        curr_json = read_json_file(get_longer_path('doc_index'))
         switched_json = {value: key for key, value in curr_json.items() if (key != 'current_value')}
-        write_obj_to_json_file(switched_json, get_path('doc_index_switched'))
+        write_obj_to_json_file(switched_json, get_longer_path('doc_index_switched'))
 
     def create_inverted_keyword_index(self, files_destination):
         # files_destination is path to directory with files
-        index_json = read_json_file(get_path('doc_index'))
+        index_json = read_json_file(get_longer_path('doc_index'))
 
         all_words = []
         keyword_index = {}
@@ -134,24 +134,24 @@ class SSE:
         inverted_index = {word: [txt for txt, words in keyword_index.items() if word in words] for word in all_words}
         # print(inverted_index)
 
-        write_obj_to_json_file(inverted_index, get_path('inverted_index'))
+        write_obj_to_json_file(inverted_index, get_longer_path('inverted_index'))
 
     def update_inverted_keyword_index(self, changed_files):
         # can apply to only new files
         # changed_files is a list of strings
-        index_json = read_json_file(get_path('doc_index'))
+        index_json = read_json_file(get_longer_path('doc_index'))
 
         all_words = []
         new_keyword_index = {}
         for path in changed_files:
-            content = read_file(get_path('data') + path)
+            content = read_file(get_longer_path('data') + path)
             # print(path, content)
             new_keyword_index[index_json[path]] = content
             all_words += content
 
         all_words = list(set(all_words))  # make words list unique
 
-        curr_inverted_index = read_json_file(get_path('inverted_index'))
+        curr_inverted_index = read_json_file(get_longer_path('inverted_index'))
         new_inverted_index = {word: [txt for txt, words in new_keyword_index.items() if word in words] for word in all_words}
         # print(curr_inverted_index)
         # print(new_inverted_index)
@@ -164,12 +164,12 @@ class SSE:
                 curr_inverted_index[key] = value
 
         # print(curr_inverted_index)
-        write_obj_to_json_file(curr_inverted_index, get_path('inverted_index'))
+        write_obj_to_json_file(curr_inverted_index, get_longer_path('inverted_index'))
 
     def encrypt_index(self):
-        inverted_index = read_json_file(get_path('inverted_index'))
-        index_key = read_bin_file(get_path('index_key'))
-        ivs = read_json_file(get_path('ivs'))
+        inverted_index = read_json_file(get_longer_path('inverted_index'))
+        index_key = read_bin_file(get_longer_path('index_key'))
+        ivs = read_json_file(get_longer_path('ivs'))
 
         encrypted_index = {}
         for word, document_ids in inverted_index.items():
@@ -179,15 +179,15 @@ class SSE:
                 encrypted_index[ciphertext] = doc_id
         # print(len(encrypted_index), encrypted_index)
 
-        write_obj_to_json_file(encrypted_index, get_path('encrypted_index'))
+        write_obj_to_json_file(encrypted_index, get_longer_path('encrypted_index'))
 
     def encrypt_documents(self, files_source, files_destination):
         # files_source is path to directory with files
         # files_destination is path to directory with newly encrypted files
 
-        key = read_bin_file(get_path('document_key'))
-        ivs = read_json_file(get_path('ivs'))
-        doc_index = read_json_file(get_path('doc_index'))
+        key = read_bin_file(get_longer_path('document_key'))
+        ivs = read_json_file(get_longer_path('ivs'))
+        doc_index = read_json_file(get_longer_path('doc_index'))
 
         files = os.listdir(files_source)
         for file in files:
@@ -205,8 +205,8 @@ class SSE:
             write_to_file(new_path, ciphertext)
 
     def generate_search_token(self, keyword):
-        index_key = read_bin_file(get_path('index_key'))
-        ivs = read_json_file(get_path('ivs'))
+        index_key = read_bin_file(get_longer_path('index_key'))
+        ivs = read_json_file(get_longer_path('ivs'))
 
         search_token = []
 
@@ -216,8 +216,8 @@ class SSE:
         return search_token
 
     def search(self, search_token):
-        encrypted_index = read_json_file(get_path('encrypted_index'))
-        doc_index_switched = read_json_file(get_path('doc_index_switched'))
+        encrypted_index = read_json_file(get_longer_path('encrypted_index'))
+        doc_index_switched = read_json_file(get_longer_path('doc_index_switched'))
         str_search_token = [bytes_2_string(token) for token in search_token]
 
         doc_ids2return = [encrypted_index[token] for token in str_search_token if token in encrypted_index]
@@ -225,19 +225,19 @@ class SSE:
 
         for doc_id in doc_ids2return:
             file = doc_index_switched[str(doc_id)]
-            filepath = get_path('server') + file
+            filepath = get_longer_path('server') + file
             # copy encrypted file to user
-            copy(filepath, get_path('user_enc'))
+            copy(filepath, get_longer_path('user_enc'))
 
     def decrypt_documents(self):
-        doc_index = read_json_file(get_path('doc_index'))
-        doc_key = read_bin_file(get_path('document_key'))
-        ivs = read_json_file(get_path('ivs'))
+        doc_index = read_json_file(get_longer_path('doc_index'))
+        doc_key = read_bin_file(get_longer_path('document_key'))
+        ivs = read_json_file(get_longer_path('ivs'))
 
-        files = os.listdir(get_path('user_enc'))
+        files = os.listdir(get_longer_path('user_enc'))
 
         for file in files:
-            content = enc_read_file(get_path('user_enc') + file)
+            content = enc_read_file(get_longer_path('user_enc') + file)
             content = [string_2_bytes(c, 'latin-1') for c in content]
             content = repair_data(content)
 
@@ -257,18 +257,18 @@ class SSE:
             stripped_plaintext = ' '.join(map(str, stripped_plaintext))
 
             # write to decrypted folder
-            write_to_file(get_path('user_dec') + file, stripped_plaintext)
+            write_to_file(get_longer_path('user_dec') + file, stripped_plaintext)
 
     def delete_user_directories(self):
-        enc_path = get_path('user_enc')
-        dec_path = get_path('user_dec')
+        enc_path = get_longer_path('user_enc')
+        dec_path = get_longer_path('user_dec')
         enc_files = os.listdir(enc_path)
         dec_files = os.listdir(dec_path)
         [os.remove(enc_path + f) for f in enc_files]
         [os.remove(dec_path + f) for f in dec_files]
 
     def delete_server_text_files(self):
-        server_path = get_path('server')
+        server_path = get_longer_path('server')
         text_files = os.listdir(server_path)
         [os.remove(server_path + txt) for txt in text_files if txt.endswith(".txt")]
 
@@ -281,9 +281,9 @@ if __name__ == '__main__':
     # sse.generate_and_save_keys()
     # sse.update_IVs_and_doc_index()
     # sse.create_switched_document_index()
-    # sse.create_inverted_keyword_index(get_path('data'))
+    # sse.create_inverted_keyword_index(get_longer_path('data'))
     # sse.encrypt_index()
-    # sse.encrypt_documents(get_path('data'), get_path('server'))
+    # sse.encrypt_documents(get_longer_path('data'), get_longer_path('server'))
 
     # sse.delete_user_directories()
 
@@ -300,13 +300,13 @@ if __name__ == '__main__':
 
 
     '''
-    key = read_bin_file(get_path('document_key'))
+    key = read_bin_file(get_longer_path('document_key'))
 
-    res = read_json_file(get_path('ivs'))
+    res = read_json_file(get_longer_path('ivs'))
     # print(res)
     iv = string_2_bytes(res['2'], 'latin-1')
 
-    # mess = read_file(get_path('data') + 'text_SLO_ZGO.txt')
+    # mess = read_file(get_longer_path('data') + 'text_SLO_ZGO.txt')
     # print('mess', mess)
 
     a = sse.encrypt(key, iv, ['personal//name//Marko'])
@@ -397,9 +397,9 @@ if __name__ == '__main__':
 
 
     '''
-    key = read_bin_file(get_path('document_key'))
+    key = read_bin_file(get_longer_path('document_key'))
 
-    res = read_json_file(get_path('ivs'))
+    res = read_json_file(get_longer_path('ivs'))
     # print(res)
     iv = string_2_bytes(res['2'], 'latin-1')
 
