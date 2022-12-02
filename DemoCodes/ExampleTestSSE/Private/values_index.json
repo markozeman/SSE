@@ -1,0 +1,174 @@
+{
+    "health//diastolic//": [
+        [
+            "75",
+            1
+        ],
+        [
+            "77",
+            1
+        ],
+        [
+            "88",
+            1
+        ]
+    ],
+    "health//heartRate//": [
+        [
+            "50",
+            1
+        ],
+        [
+            "66",
+            1
+        ],
+        [
+            "72",
+            1
+        ]
+    ],
+    "health//spO2//": [
+        [
+            "97",
+            1
+        ],
+        [
+            "98",
+            1
+        ],
+        [
+            "99",
+            1
+        ]
+    ],
+    "health//systolic//": [
+        [
+            "115",
+            1
+        ],
+        [
+            "133",
+            1
+        ],
+        [
+            "140",
+            1
+        ]
+    ],
+    "health//temperature//": [
+        [
+            "35.9",
+            1
+        ],
+        [
+            "36.1",
+            1
+        ],
+        [
+            "36.4",
+            1
+        ]
+    ],
+    "personal//address//city//": [
+        [
+            "Ljubljana",
+            2
+        ],
+        [
+            "Maribor",
+            1
+        ]
+    ],
+    "personal//address//country//": [
+        [
+            "Slovenia",
+            3
+        ]
+    ],
+    "personal//address//houseNumber//": [
+        [
+            "15",
+            1
+        ],
+        [
+            "25",
+            1
+        ],
+        [
+            "300",
+            1
+        ]
+    ],
+    "personal//address//postCode//": [
+        [
+            "1000",
+            2
+        ],
+        [
+            "2000",
+            1
+        ]
+    ],
+    "personal//address//street//": [
+        [
+            "Mariborska cesta",
+            1
+        ],
+        [
+            "TKS",
+            1
+        ],
+        [
+            "\u010copova ulica",
+            1
+        ]
+    ],
+    "personal//birthDate//": [
+        [
+            "17. 11. 1975",
+            1
+        ],
+        [
+            "19. 09. 1950",
+            1
+        ],
+        [
+            "25. 08. 1995",
+            1
+        ]
+    ],
+    "personal//firstName//": [
+        [
+            "Ana",
+            1
+        ],
+        [
+            "Janez",
+            1
+        ],
+        [
+            "Marko",
+            1
+        ]
+    ],
+    "personal//lastName//": [
+        [
+            "Horvat",
+            1
+        ],
+        [
+            "Novak",
+            1
+        ],
+        [
+            "Zeman",
+            1
+        ]
+    ],
+    "type//": [
+        [
+            "patient",
+            3
+        ]
+    ]
+}

@@ -1,5 +1,11 @@
 # Searchable Symmetric Encryption with order preservation
 
+### N.B.
+* `pip install -r requirements.txt`
+* `DemoCodes/FreshCopy` has been created by following the steps already.
+* main00, main01, ... etc has been created by following the codes given in the steps.
+* `DemoCodes/ExampleTestSSE` is an example of simulation
+
 ### _About_
 Searchable Symmetric Encryption enables search over encrypted data.  
 Order preservation gives us possibility to search over encrypted data not only by exact match but also with operators like < and >. 
