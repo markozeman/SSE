@@ -1,0 +1,22 @@
+{
+    "type": "patient",
+    "personal": {
+        "birthDate": "19. 09. 1950",
+        "firstName": "Janez",
+        "lastName": "Novak",
+        "address": {
+            "street": "\u010copova ulica",
+            "houseNumber": "25",
+            "city": "Ljubljana",
+            "country": "Slovenia",
+            "postCode": "1000"
+        }
+    },
+    "health": {
+        "temperature": "36.4",
+        "heartRate": "72",
+        "systolic": "140",
+        "diastolic": "88",
+        "spO2": "98"
+    }
+}

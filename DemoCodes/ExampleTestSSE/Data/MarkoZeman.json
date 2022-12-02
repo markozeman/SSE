@@ -1,0 +1,22 @@
+{
+    "type": "patient",
+    "personal": {
+        "birthDate": "25. 08. 1995",
+        "firstName": "Marko",
+        "lastName": "Zeman",
+        "address": {
+            "street": "TKS",
+            "houseNumber": "15",
+            "city": "Ljubljana",
+            "country": "Slovenia",
+            "postCode": "1000"
+        }
+    },
+    "health": {
+        "temperature": "35.9",
+        "heartRate": "50",
+        "systolic": "115",
+        "diastolic": "75",
+        "spO2": "99"
+    }
+}

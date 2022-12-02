@@ -1,0 +1,22 @@
+{
+    "type": "patient",
+    "personal": {
+        "birthDate": "17. 11. 1975",
+        "firstName": "Ana",
+        "lastName": "Horvat",
+        "address": {
+            "street": "Mariborska cesta",
+            "houseNumber": "300",
+            "city": "Maribor",
+            "country": "Slovenia",
+            "postCode": "2000"
+        }
+    },
+    "health": {
+        "temperature": "36.1",
+        "heartRate": "66",
+        "systolic": "133",
+        "diastolic": "77",
+        "spO2": "97"
+    }
+}
